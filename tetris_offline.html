@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Pastel</title>
+    <style>
+        /* Estilo personalizado para el canvas del juego */
+        canvas {
+            background-color: #f0f4f8; /* Un azul muy claro y suave */
+            border: 4px solid #a7d9f7; /* Borde azul pastel */
+            border-radius: 12px; /* Esquinas redondeadas para el canvas */
+            display: block;
+            margin: 0 auto;
+            touch-action: none; /* Previene el desplazamiento por defecto en móviles */
+        }
+
+        /* Estilo general para el cuerpo de la página */
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #e0f2f7 0%, #c8e6c9 100%); /* Degradado suave de pastel */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            color: #4a5568; /* Color de texto suave */
+        }
+
+        /* Contenedor principal del juego */
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff; /* Fondo blanco para el contenedor */
+            border-radius: 20px; /* Esquinas más redondeadas */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra suave */
+            padding: 25px;
+            gap: 20px; /* Espacio entre elementos */
+            position: relative; /* Para posicionar el mensaje de combo */
+        }
+
+        /* Estilo para los botones de control */
+        .control-button {
+            background-color: #90CDF4; /* bg-blue-300 */
+            color: white; /* text-white */
+            font-weight: bold; /* font-bold */
+            padding: 0.75rem 1.5rem; /* py-3 px-6 */
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
+            transition-property: all; /* transition */
+            transition-duration: 300ms; /* duration-300 */
+            transition-timing-function: ease-in-out; /* ease-in-out */
+            transform: scale(1); /* transform */
+            min-width: 80px; /* Ancho mínimo para los botones */
+            min-height: 50px; /* Alto mínimo para los botones */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            border: none; /* Eliminar el borde predeterminado del botón */
+            cursor: pointer; /* Cambiar el cursor a puntero al pasar el ratón */
+        }
+
+        .control-button:hover {
+            background-color: #63B3ED; /* hover:bg-blue-400 */
+            transform: scale(1.05); /* hover:scale-105 */
+        }
+
+        /* Estilos específicos para la sección de controles táctiles */
+        .touch-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 400px; /* Limita el ancho de los controles */
+        }
+
+        .touch-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        /* Animación para los botones al ser presionados */
+        .control-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Estilo para el mensaje de combo */
+        #combo-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            font-weight: bold;
+            color: #ef4444; /* Rojo vibrante */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+            pointer-events: none; /* Permite clics a través del mensaje */
+        }
+
+        #combo-message.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        /* Adaptabilidad para pantallas pequeñas */
+        @media (max-width: 640px) {
+            .game-container {
+                padding: 15px;
+                gap: 15px;
+            }
+            .control-button {
+                min-width: 70px;
+                min-height: 45px;
+                font-size: 1em;
+                padding: 10px 20px;
+            }
+            .touch-controls {
+                gap: 10px;
+            }
+            .touch-row {
+                gap: 10px;
+            }
+            #combo-message {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+</head>
+<body class="selection:bg-pink-200 selection:text-pink-800">
+    <div class="game-container">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 mb-4 text-center">Tetris Pastel</h1>
+        <div id="game-info" class="text-lg font-semibold text-gray-700 mb-3 text-center">
+            Puntuación: <span id="score">0</span> | Nivel: <span id="level">1</span> | Siguiente: <span id="next-piece-display"></span>
+        </div>
+        <canvas id="tetrisCanvas"></canvas>
+        <div id="game-message" class="text-2xl font-bold text-red-500 hidden mt-4"></div>
+        <div id="combo-message"></div> <!-- Mensaje de combo -->
+
+        <!-- Controles Táctiles -->
+        <div class="touch-controls mt-6">
+            <div class="touch-row">
+                <button id="btnRotate" class="control-button">Rotar</button>
+            </div>
+            <div class="touch-row">
+                <button id="btnLeft" class="control-button">← Izquierda</button>
+                <button id="btnDown" class="control-button">↓ Abajo</button>
+                <button id="btnRight" class="control-button">Derecha →</button>
+            </div>
+            <div class="touch-row">
+                <button id="btnDrop" class="control-button w-full">Soltar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Configuración del Canvas ---
+        const canvas = document.getElementById('tetrisCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const COLS = 10; // Columnas del tablero
+        const ROWS = 20; // Filas del tablero
+        const BLOCK_SIZE = 30; // Tamaño de cada bloque en píxeles
+
+        // Ajusta el tamaño del canvas
+        canvas.width = COLS * BLOCK_SIZE;
+        canvas.height = ROWS * BLOCK_SIZE;
+
+        // --- Variables del Juego ---
+        let board = []; // El tablero de juego
+        let currentPiece; // La pieza actual en juego
+        let nextPiece; // La siguiente pieza
+        let score = 0; // Puntuación del jugador
+        let gameOver = false; // Estado del juego
+        let gameLoopId; // ID para el loop del juego (para clearInterval)
+        let lastUpdateTime = 0; // Para controlar el tiempo de caída de la pieza
+
+        let level = 1; // Nivel actual del juego
+        let linesClearedTotal = 0; // Total de líneas limpiadas en el juego
+        const LINES_PER_LEVEL = 10; // Número de líneas para subir de nivel
+        const BASE_FALL_INTERVAL = 500; // Intervalo de caída base en ms (0.5 segundos)
+        let currentFallInterval = BASE_FALL_INTERVAL; // Intervalo de caída actual
+
+        const scoreDisplay = document.getElementById('score');
+        const levelDisplay = document.getElementById('level');
+        const gameMessage = document.getElementById('game-message');
+        const nextPieceDisplay = document.getElementById('next-piece-display');
+        const comboMessageElement = document.getElementById('combo-message');
+
+        // --- Colores Pastel para las Piezas ---
+        const COLORS = [
+            '#FFD1DC', // Rosa Pastel (I)
+            '#FFECB3', // Amarillo Claro Pastel (O)
+            '#B2EBF2', // Azul Claro Pastel (T)
+            '#C8E6C9', // Verde Menta Pastel (S)
+            '#F0F4C3', // Crema Pastel (Z)
+            '#B3E0FF', // Azul Cielo Pastel (J)
+            '#D1C4E9'  // Lavanda Pastel (L)
+        ];
+
+        // --- Definición de Piezas (Tetrominoes) ---
+        // Cada pieza es un array de matrices, representando sus rotaciones.
+        // Los números indican el color/tipo de la pieza (índice en COLORS).
+        const TETROMINOES = [
+            // I (Recta)
+            [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
+            [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]],
+
+            // O (Cuadrado)
+            [[2, 2], [2, 2]],
+
+            // T
+            [[0, 3, 0], [3, 3, 3], [0, 0, 0]],
+            [[3, 0, 0], [3, 3, 0], [3, 0, 0]],
+            [[0, 0, 0], [3, 3, 3], [0, 3, 0]],
+            [[0, 3, 0], [0, 3, 3], [0, 3, 0]],
+
+            // S
+            [[0, 4, 4], [4, 4, 0], [0, 0, 0]],
+            [[4, 0, 0], [4, 4, 0], [0, 4, 0]],
+
+            // Z
+            [[5, 5, 0], [0, 5, 5], [0, 0, 0]],
+            [[0, 5, 0], [5, 5, 0], [5, 0, 0]],
+
+            // J
+            [[6, 0, 0], [6, 6, 6], [0, 0, 0]],
+            [[0, 6, 6], [0, 6, 0], [0, 6, 0]],
+            [[0, 0, 0], [6, 6, 6], [0, 0, 6]],
+            [[0, 6, 0], [0, 6, 0], [6, 6, 0]],
+
+            // L
+            [[0, 0, 7], [7, 7, 7], [0, 0, 0]],
+            [[0, 7, 0], [0, 7, 0], [0, 7, 7]],
+            [[0, 0, 0], [7, 7, 7], [7, 0, 0]],
+            [[7, 7, 0], [0, 7, 0], [0, 7, 0]]
+        ];
+
+        // Asocia cada forma a un índice de color específico
+        const TETROMINO_SHAPES = {
+            'I': { shape: [[1, 1, 1, 1]], colorIndex: 0 },
+            'O': { shape: [[1, 1], [1, 1]], colorIndex: 1 },
+            'T': { shape: [[0, 1, 0], [1, 1, 1]], colorIndex: 2 },
+            'S': { shape: [[0, 1, 1], [1, 1, 0]], colorIndex: 3 },
+            'Z': { shape: [[1, 1, 0], [0, 1, 1]], colorIndex: 4 },
+            'J': { shape: [[1, 0, 0], [1, 1, 1]], colorIndex: 5 },
+            'L': { shape: [[0, 0, 1], [1, 1, 1]], colorIndex: 6 }
+        };
+
+        // Class para representar una pieza de Tetris
+        class Piece {
+            constructor(shapeType) {
+                const { shape, colorIndex } = TETROMINO_SHAPES[shapeType];
+                this.shape = shape;
+                this.color = COLORS[colorIndex];
+                this.x = Math.floor(COLS / 2) - Math.floor(shape[0].length / 2); // Posición inicial X
+                this.y = 0; // Posición inicial Y
+                this.shapeType = shapeType; // Guarda el tipo de forma (para mostrar la siguiente)
+            }
+
+            // Dibuja la pieza en el canvas
+            draw() {
+                this.shape.forEach((row, r) => {
+                    row.forEach((value, c) => {
+                        if (value > 0) {
+                            ctx.fillStyle = this.color;
+                            ctx.fillRect(this.x * BLOCK_SIZE + c * BLOCK_SIZE, this.y * BLOCK_SIZE + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                            ctx.strokeStyle = '#fff'; // Borde blanco suave para los bloques
+                            ctx.lineWidth = 1;
+                            ctx.strokeRect(this.x * BLOCK_SIZE + c * BLOCK_SIZE, this.y * BLOCK_SIZE + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                        }
+                    });
+                });
+            }
+
+            // Mueve la pieza
+            move(dx, dy) {
+                if (!this.collision(dx, dy, this.shape)) {
+                    this.x += dx;
+                    this.y += dy;
+                    return true;
+                }
+                return false;
+            }
+
+            // Rota la pieza
+            rotate() {
+                // Función para transponer una matriz (filas a columnas)
+                const transpose = (matrix) => matrix[0].map((_, i) => matrix.map(row => row[i]));
+                // Función para invertir las filas de una matriz (para rotación anti-horaria)
+                const reverseRows = (matrix) => matrix.map(row => [...row].reverse());
+
+                let rotatedShape = transpose(this.shape);
+                // Si es la pieza 'I' o 'S' o 'Z', rota de forma diferente para mantener la forma
+                if (this.shapeType === 'I' || this.shapeType === 'S' || this.shapeType === 'Z') {
+                    rotatedShape = reverseRows(rotatedShape);
+                } else {
+                    rotatedShape = rotatedShape.reverse(); // Rotación normal para otras piezas
+                }
+
+                if (!this.collision(0, 0, rotatedShape)) {
+                    this.shape = rotatedShape;
+                    return true;
+                }
+                // Si la rotación causa colisión, intenta desplazar la pieza (Wall Kick)
+                const kicks = [
+                    [0, 0], [-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]
+                ]; // Posibles desplazamientos para wall kick
+
+                for (let i = 0; i < kicks.length; i++) {
+                    const [dx, dy] = kicks[i];
+                    if (!this.collision(dx, dy, rotatedShape)) {
+                        this.x += dx;
+                        this.y += dy;
+                        this.shape = rotatedShape;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            // Comprueba si hay colisión en una posición dada con una forma específica
+            collision(dx, dy, newShape) {
+                for (let r = 0; r < newShape.length; r++) {
+                    for (let c = 0; c < newShape[r].length; c++) {
+                        if (newShape[r][c] > 0) { // Si es un bloque de la pieza
+                            let newX = this.x + c + dx;
+                            let newY = this.y + r + dy;
+
+                            // Comprueba los límites del tablero y las colisiones con bloques existentes
+                            if (newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && board[newY][newX] !== 'empty')) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+
+            // Bloquea la pieza en el tablero
+            lock() {
+                this.shape.forEach((row, r) => {
+                    row.forEach((value, c) => {
+                        if (value > 0) {
+                            let boardX = this.x + c;
+                            let boardY = this.y + r;
+                            if (boardY < 0) { // Si la pieza está por encima del tablero (game over)
+                                gameOver = true;
+                                gameMessage.textContent = '¡Game Over!';
+                                gameMessage.classList.remove('hidden');
+                                clearInterval(gameLoopId); // Detiene el bucle del juego
+                                return;
+                            }
+                            board[boardY][boardX] = this.color; // Asigna el color al tablero
+                        }
+                    });
+                });
+                this.clearLines(); // Comprueba y limpia líneas
+                this.generateNewPiece(); // Genera una nueva pieza
+            }
+            // Elimina líneas completas del tablero
+            clearLines() {
+                let linesCleared = 0;
+                for (let r = ROWS - 1; r >= 0; r--) {
+                    if (board[r].every(cell => cell !== 'empty')) { // Si la fila está completa
+                        linesCleared++;
+                        // Elimina la fila y añade una nueva fila vacía al principio
+                        board.splice(r, 1);
+                        board.unshift(Array(COLS).fill('empty'));
+                        r++; // Vuelve a verificar la misma fila (ahora con los bloques de arriba)
+                    }
+                }
+                if (linesCleared > 0) {
+                    score += linesCleared * 100 * level; // Aumenta la puntuación, influenciada por el nivel
+                    scoreDisplay.textContent = score;
+
+                    linesClearedTotal += linesCleared; // Actualiza el total de líneas limpiadas
+
+                    // Verifica si se sube de nivel
+                    if (level < 10 && linesClearedTotal >= level * LINES_PER_LEVEL) { // Máximo 10 niveles
+                        level++;
+                        levelDisplay.textContent = level;
+                        // Reduce el intervalo de caída para aumentar la velocidad
+                        currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level - 1) * 40); // Mínimo 50ms
+                    }
+
+                    // Efectos especiales para combos
+                    if (linesCleared === 2) {
+                        displayComboMessage('¡Doble!');
+                    } else if (linesCleared === 3) {
+                        displayComboMessage('¡Triple!');
+                    } else if (linesCleared === 4) {
+                        displayComboMessage('¡Tetris!');
+                    }
+                }
+            }
+
+            // Genera una nueva pieza para el juego
+            generateNewPiece() {
+                currentPiece = nextPiece;
+                nextPiece = this.randomPiece();
+                this.drawNextPiece();
+                if (currentPiece.collision(0, 0, currentPiece.shape)) { // Si la nueva pieza colisiona al inicio
+                    gameOver = true;
+                    gameMessage.textContent = '¡Game Over!';
+                    gameMessage.classList.remove('hidden');
+                    clearInterval(gameLoopId);
+                }
+            }
+
+            // Devuelve una pieza aleatoria
+            randomPiece() {
+                const types = Object.keys(TETROMINO_SHAPES);
+                const randType = types[Math.floor(Math.random() * types.length)];
+                return new Piece(randType);
+            }
+
+            // Dibuja la siguiente pieza en el área de "Siguiente"
+            drawNextPiece() {
+                nextPieceDisplay.innerHTML = ''; // Limpia el contenido anterior
+
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                tempCanvas.width = 4 * BLOCK_SIZE; // Tamaño máximo para una pieza 4x4
+                tempCanvas.height = 4 * BLOCK_SIZE;
+                tempCanvas.style.display = 'inline-block';
+                tempCanvas.style.verticalAlign = 'middle';
+                tempCanvas.style.marginLeft = '10px';
+                tempCanvas.style.backgroundColor = '#e0f4f8';
+                tempCanvas.style.borderRadius = '8px';
+                tempCanvas.style.border = '2px solid #a7d9f7';
+
+                nextPiece.shape.forEach((row, r) => {
+                    row.forEach((value, c) => {
+                        if (value > 0) {
+                            tempCtx.fillStyle = nextPiece.color;
+                            tempCtx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                            tempCtx.strokeStyle = '#fff';
+                            tempCtx.lineWidth = 1;
+                            tempCtx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                        }
+                    });
+                });
+                nextPieceDisplay.appendChild(tempCanvas);
+            }
+        }
+
+        // --- Funciones de Juego ---
+        function initBoard() {
+            for (let r = 0; r < ROWS; r++) {
+                board[r] = Array(COLS).fill('empty'); // Inicializa todas las celdas como vacías
+            }
+        }
+
+        // Dibuja todo el tablero, incluyendo las piezas bloqueadas
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpia todo el canvas
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    if (board[r][c] !== 'empty') {
+                        ctx.fillStyle = board[r][c]; // Usa el color almacenado
+                        ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                        ctx.strokeStyle = '#fff';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                    }
+                }
+            }
+        }
+
+        // Muestra un mensaje de combo en la pantalla
+        function displayComboMessage(message) {
+            comboMessageElement.textContent = message;
+            comboMessageElement.classList.add('show');
+            setTimeout(() => {
+                comboMessageElement.classList.remove('show');
+            }, 700); // El mensaje desaparece después de 0.7 segundos
+        }
+
+        // Bucle principal del juego
+        function gameLoop(currentTime) {
+            gameLoopId = requestAnimationFrame(gameLoop); // Solicita el siguiente frame
+
+            if (gameOver) return;
+
+            if (currentTime - lastUpdateTime > currentFallInterval) { // Usa el intervalo de caída actual
+                // La pieza cae si no colisiona
+                if (!currentPiece.move(0, 1)) {
+                    currentPiece.lock(); // Si colisiona, se bloquea
+                }
+                lastUpdateTime = currentTime;
+            }
+
+            drawBoard(); // Dibuja el tablero
+            currentPiece.draw(); // Dibuja la pieza actual
+        }
+
+        // Inicia el juego
+        function startGame() {
+            initBoard();
+            score = 0;
+            level = 1;
+            linesClearedTotal = 0;
+            currentFallInterval = BASE_FALL_INTERVAL;
+
+            scoreDisplay.textContent = score;
+            levelDisplay.textContent = level;
+            gameMessage.classList.add('hidden');
+            gameOver = false;
+            currentPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
+            nextPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
+            currentPiece.drawNextPiece(); // Muestra la primera siguiente pieza
+            lastUpdateTime = performance.now(); // Inicializa el tiempo
+            if (gameLoopId) { // Asegura que no haya múltiples loops corriendo
+                cancelAnimationFrame(gameLoopId);
+            }
+            gameLoopId = requestAnimationFrame(gameLoop); // Inicia el loop del juego
+        }
+
+        // --- Controles de Teclado ---
+        document.addEventListener('keydown', e => {
+            if (gameOver) {
+                if (e.key === 'Enter') {
+                    startGame(); // Reinicia el juego con Enter
+                }
+                return;
+            }
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                    currentPiece.move(-1, 0);
+                    break;
+                case 'ArrowRight':
+                    currentPiece.move(1, 0);
+                    break;
+                case 'ArrowDown':
+                    currentPiece.move(0, 1);
+                    break;
+                case 'ArrowUp':
+                    currentPiece.rotate();
+                    break;
+                case ' ': // Espacio para soltar la pieza
+                    while (currentPiece.move(0, 1)); // Mueve hacia abajo hasta que colisione
+                    currentPiece.lock();
+                    break;
+            }
+            drawBoard(); // Redibuja el tablero y la pieza después del movimiento
+            currentPiece.draw();
+        });
+
+        // --- Controles Táctiles ---
+        const btnLeft = document.getElementById('btnLeft');
+        const btnRight = document.getElementById('btnRight');
+        const btnDown = document.getElementById('btnDown');
+        const btnRotate = document.getElementById('btnRotate');
+        const btnDrop = document.getElementById('btnDrop');
+
+        // Función de handler para los botones
+        function handleTouchControl(action) {
+            if (gameOver) {
+                startGame(); // Si el juego termina, cualquier botón reinicia
+                return;
+            }
+            switch (action) {
+                case 'left':
+                    currentPiece.move(-1, 0);
+                    break;
+                case 'right':
+                    currentPiece.move(1, 0);
+                    break;
+                case 'down':
+                    currentPiece.move(0, 1);
+                    break;
+                case 'rotate':
+                    currentPiece.rotate();
+                    break;
+                case 'drop':
+                    while (currentPiece.move(0, 1));
+                    currentPiece.lock();
+                    break;
+            }
+            drawBoard();
+            currentPiece.draw();
+        }
+
+        btnLeft.addEventListener('click', () => handleTouchControl('left'));
+        btnRight.addEventListener('click', () => handleTouchControl('right'));
+        btnDown.addEventListener('click', () => handleTouchControl('down'));
+        btnRotate.addEventListener('click', () => handleTouchControl('rotate'));
+        btnDrop.addEventListener('click', () => handleTouchControl('drop'));
+
+        // Reinicia el juego si está en Game Over y se hace clic en cualquier botón de control
+        // Se añade un listener al documento para reiniciar el juego si gameOver es true y se hace clic en cualquier parte.
+        document.addEventListener('click', (e) => {
+            if (gameOver && e.target !== canvas && !e.target.closest('.control-button')) {
+                startGame();
+            }
+        });
+
+        // Asegura que el juego se inicie una vez el DOM esté completamente cargado
+        window.onload = function() {
+            startGame();
+        };
+    </script>
+</body>
+</html>
