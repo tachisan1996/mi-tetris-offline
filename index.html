@@ -40,11 +40,11 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra suave */
             padding: 25px;
             gap: 20px; /* Espacio entre elementos */
-            position: relative; /* Para posicionar el mensaje de combo */
+            position: relative; /* Para posicionar los mensajes */
         }
 
         /* Estilo para el mensaje de combo */
-        #combo-message {
+        #combo-message, #level-up-message {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -57,11 +57,42 @@
             opacity: 0;
             transition: opacity 0.3s ease-out, transform 0.3s ease-out;
             pointer-events: none; /* Permite clics a través del mensaje */
+            text-align: center; /* Centra el texto */
         }
 
-        #combo-message.show {
+        #level-up-message {
+            color: #4CAF50; /* Verde para mensajes de nivel */
+            font-size: 2.5em; /* Un poco más pequeño que los combos */
+        }
+
+        #combo-message.show, #level-up-message.show {
             opacity: 1;
             transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        /* Estilo para el botón de pausa */
+        .pause-button {
+            background-color: #FFC107; /* Amarillo pastel */
+            color: white;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease-in-out;
+            transform: scale(1);
+            border: none;
+            cursor: pointer;
+            margin-top: 10px; /* Espacio superior */
+        }
+
+        .pause-button:hover {
+            background-color: #FFA000; /* Amarillo más oscuro al pasar el ratón */
+            transform: scale(1.05);
+        }
+
+        .pause-button:active {
+            transform: scale(0.98);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
 
         /* Adaptabilidad para pantallas pequeñas */
@@ -72,6 +103,13 @@
             }
             #combo-message {
                 font-size: 2.2em;
+            }
+            #level-up-message {
+                font-size: 1.8em;
+            }
+            .pause-button {
+                padding: 0.6rem 1.2rem;
+                font-size: 1em;
             }
         }
     </style>
@@ -85,9 +123,12 @@
         <canvas id="tetrisCanvas"></canvas>
         <div id="game-message" class="text-2xl font-bold text-red-500 hidden mt-4"></div>
         <div id="combo-message"></div> <!-- Mensaje de combo -->
+        <div id="level-up-message"></div> <!-- Mensaje de subir de nivel -->
+
+        <!-- Botón de Pausa -->
+        <button id="pauseButton" class="pause-button">Pausar</button>
 
         <!-- Los controles táctiles ahora se implementan directamente en el canvas -->
-        <!-- No hay botones explícitos aquí para los controles de movimiento/rotación -->
     </div>
 
     <script>
@@ -117,12 +158,15 @@
         const BASE_FALL_INTERVAL = 500; // Intervalo de caída base en ms (0.5 segundos)
         let currentFallInterval = BASE_FALL_INTERVAL; // Intervalo de caída actual
         let nextLevelScoreThreshold = 2000; // Puntos necesarios para el siguiente nivel
+        let isPaused = false; // Variable para controlar el estado de pausa
 
         const scoreDisplay = document.getElementById('score');
         const levelDisplay = document.getElementById('level');
         const gameMessage = document.getElementById('game-message');
         const nextPieceDisplay = document.getElementById('next-piece-display');
         const comboMessageElement = document.getElementById('combo-message');
+        const levelUpMessageElement = document.getElementById('level-up-message'); // Nuevo elemento para mensajes de nivel
+        const pauseButton = document.getElementById('pauseButton');
 
         // --- Colores Pastel para las Piezas ---
         const COLORS = [
@@ -161,20 +205,6 @@
             [[0, 5, 0], [5, 5, 0], [5, 0, 0]],
 
             // J
-            [[6, 0, 0], [6, 6, 6], [0, 0, 0]],
-            [[0, 6, 6], [0, 6, 0], [0, 6, 0]],
-            [[0, 0, 0], [6, 6, 6], [0, 0, 6]],
-            [[0, 6, 0], [0, 6, 0], [6, 6, 0]],
-
-            // L
-            [[0, 0, 7], [7, 7, 7], [0, 0, 0]],
-            [[0, 7, 0], [0, 7, 0], [0, 7, 7]],
-            [[0, 0, 0], [7, 7, 7], [7, 0, 0]],
-            [[7, 7, 0], [0, 7, 0], [0, 7, 0]]
-        ];
-
-        // Asocia cada forma a un índice de color específico
-        const TETROMINO_SHAPES = {
             'I': { shape: [[1, 1, 1, 1]], colorIndex: 0 },
             'O': { shape: [[1, 1], [1, 1]], colorIndex: 1 },
             'T': { shape: [[0, 1, 0], [1, 1, 1]], colorIndex: 2 },
@@ -322,9 +352,8 @@
                         nextLevelScoreThreshold = 2000 + (level - 1) * 1000;
 
                         // Reduce el intervalo de caída para aumentar la velocidad (dificultad)
-                        // currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level - 1) * 40); // Mínimo 50ms
-                        // Ajuste para que la dificultad aumente un poco más rápido
                         currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 50));
+                        displayLevelUpMessage(); // Muestra el mensaje de nivel
                     }
 
                     // Efectos especiales para combos
@@ -420,11 +449,35 @@
             }, 700); // El mensaje desaparece después de 0.7 segundos
         }
 
+        // Mensajes para subir de nivel
+        const levelUpMessages = [
+            "¡Felicidades, eres imparable! Nuevo Nivel.",
+            "¡Impresionante! ¡A por el siguiente reto!",
+            "¡Subiste de nivel! Sigue así.",
+            "¿Sabías que el Tetris fue creado en 1984? ¡Sigue haciendo historia!",
+            "¡Guau! Tu concentración es de otro nivel. ¡Literalmente!",
+            "El Tetris es como la vida, siempre buscando el encaje perfecto. ¡Vas genial!",
+            "¿Qué hace un Tetris triste? ¡Se siente bloqueado! Pero tú no, ¡felicidades!",
+            "¡Has alcanzado el siguiente nivel de la maestría en Tetris! ¡Adelante!",
+            "Cada pieza es una oportunidad, y tú las aprovechas. ¡Nuevo nivel desbloqueado!",
+            "¡Increíble! Sigue apilando éxitos y no solo bloques."
+        ];
+
+        // Muestra un mensaje de nivel en la pantalla
+        function displayLevelUpMessage() {
+            const randomIndex = Math.floor(Math.random() * levelUpMessages.length);
+            levelUpMessageElement.textContent = levelUpMessages[randomIndex];
+            levelUpMessageElement.classList.add('show');
+            setTimeout(() => {
+                levelUpMessageElement.classList.remove('show');
+            }, 2000); // El mensaje de nivel dura más (2 segundos)
+        }
+
         // Bucle principal del juego
         function gameLoop(currentTime) {
             gameLoopId = requestAnimationFrame(gameLoop); // Solicita el siguiente frame
 
-            if (gameOver) return;
+            if (gameOver || isPaused) return; // Si está pausado o game over, no actualiza la lógica del juego
 
             if (currentTime - lastUpdateTime > currentFallInterval) { // Usa el intervalo de caída actual
                 // La pieza cae si no colisiona
@@ -446,10 +499,14 @@
             linesClearedTotal = 0; // Se mantiene, aunque el score es el principal para el nivel
             currentFallInterval = BASE_FALL_INTERVAL;
             nextLevelScoreThreshold = 2000; // Reinicia el umbral para el Nivel 1 -> 2
+            isPaused = false; // Asegura que no esté pausado al inicio
+            pauseButton.textContent = "Pausar"; // Restablece el texto del botón
 
             scoreDisplay.textContent = score;
             levelDisplay.textContent = level;
             gameMessage.classList.add('hidden');
+            comboMessageElement.classList.remove('show'); // Esconde mensajes de combo
+            levelUpMessageElement.classList.remove('show'); // Esconde mensajes de nivel
             gameOver = false;
             currentPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
             nextPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
@@ -470,6 +527,8 @@
                 return;
             }
 
+            if (isPaused && e.key !== 'p' && e.key !== 'P') return; // No procesar teclas si está pausado, excepto 'p' para despausar
+
             switch (e.key) {
                 case 'ArrowLeft':
                     currentPiece.move(-1, 0);
@@ -487,17 +546,24 @@
                     while (currentPiece.move(0, 1)); // Mueve hacia abajo hasta que colisione
                     currentPiece.lock();
                     break;
+                case 'p': // Tecla 'p' para pausa
+                case 'P':
+                    togglePause();
+                    break;
             }
-            drawBoard(); // Redibuja el tablero y la pieza después del movimiento
-            currentPiece.draw();
+            if (!isPaused) { // Solo redibujar si no está pausado
+                drawBoard(); // Redibuja el tablero y la pieza después del movimiento
+                currentPiece.draw();
+            }
         });
 
         // --- Controles Táctiles en el Canvas ---
         let touchStartX = 0;
         let touchStartY = 0;
-        const tapThreshold = 15; // px para un "toque" (movimiento insignificante)
-        const swipeThreshold = 50; // px mínimo para un "deslizamiento"
-        const hardDropSwipeThreshold = 150; // px mínimo para un "deslizamiento fuerte hacia abajo" (hard drop)
+        // Ajustes para hacer los controles más rápidos
+        const tapThreshold = 10; // px para un "toque" (movimiento insignificante)
+        const swipeThreshold = 30; // px mínimo para un "deslizamiento"
+        const hardDropSwipeThreshold = 100; // px mínimo para un "deslizamiento fuerte hacia abajo" (hard drop)
 
         canvas.addEventListener('touchstart', e => {
             e.preventDefault(); // Previene el scroll o zoom del navegador
@@ -505,6 +571,8 @@
                 startGame(); // Reinicia el juego si está en Game Over
                 return;
             }
+            if (isPaused) return; // Ignora toques si está pausado
+
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         });
@@ -514,7 +582,7 @@
         });
 
         canvas.addEventListener('touchend', e => {
-            if (gameOver) return; // Si el juego terminó, no procesar más toques de juego
+            if (gameOver || isPaused) return; // Si el juego terminó o está pausado, no procesar más toques de juego
 
             const touchEndX = e.changedTouches[0].clientX;
             const touchEndY = e.changedTouches[0].clientY;
@@ -557,6 +625,31 @@
             }
             drawBoard(); // Redibuja el tablero y la pieza después del movimiento
             currentPiece.draw();
+        });
+
+        // --- Funciones de Pausa ---
+        function togglePause() {
+            isPaused = !isPaused;
+            if (isPaused) {
+                pauseButton.textContent = "Reanudar";
+                gameMessage.textContent = '¡Juego Pausado!';
+                gameMessage.classList.remove('hidden');
+            } else {
+                pauseButton.textContent = "Pausar";
+                gameMessage.classList.add('hidden');
+                lastUpdateTime = performance.now(); // Resetea el tiempo para evitar caída instantánea al reanudar
+                gameLoop(performance.now()); // Reanuda el bucle del juego
+            }
+        }
+        // Event Listener para el botón de pausa
+        pauseButton.addEventListener('click', togglePause);
+
+
+        // Reinicia el juego si está en Game Over y se hace clic en cualquier parte (excepto el botón de pausa)
+        document.addEventListener('click', (e) => {
+            if (gameOver && e.target !== canvas && e.target !== pauseButton) { // Excluye el canvas y el botón de pausa
+                startGame();
+            }
         });
 
 
