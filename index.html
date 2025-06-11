@@ -62,7 +62,7 @@
 
         #level-up-message {
             color: #10B981; /* Verde más intenso para mensajes de nivel */
-            font-size: 2.8em; /* Un poco más grande y notorio */
+            font-size: 2em; /* Ajustado para ser más pequeño y legible */
         }
 
         #combo-message.show, #level-up-message.show {
@@ -119,7 +119,7 @@
                 font-size: 2.5em;
             }
             #level-up-message {
-                font-size: 2em;
+                font-size: 1.5em; /* Ajustado para pantallas pequeñas */
             }
             .game-button {
                 padding: 0.6rem 1.2rem;
@@ -352,9 +352,12 @@
                         nextLevelScoreThreshold += 1000; // Incrementa el umbral en 1000 para el siguiente nivel
 
                         // Reduce el intervalo de caída para aumentar la velocidad (dificultad)
-                        // currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 50)); // Escalado de dificultad
-                        // Escalado de dificultad más agresivo
                         currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 75)); // Aumenta la velocidad más rápido
+
+                        // Pausar el juego y mostrar el chiste
+                        isPaused = true;
+                        pauseButton.textContent = "Reanudar"; // Actualiza el texto del botón de pausa
+                        cancelAnimationFrame(gameLoopId); // Detiene el bucle del juego
                         displayLevelUpMessage(); // Muestra el mensaje de nivel (chiste)
                     }
 
@@ -476,11 +479,13 @@
         // Muestra un chiste de nivel en la pantalla
         function displayLevelUpMessage() {
             const randomIndex = Math.floor(Math.random() * levelUpJokes.length);
-            levelUpMessageElement.textContent = `¡Nivel ${level}! ` + levelUpJokes[randomIndex];
+            levelUpMessageElement.textContent = `¡Nivel ${level}! \n` + levelUpJokes[randomIndex]; // Añade salto de línea para chiste
             levelUpMessageElement.classList.add('show');
+            // El chiste se quedará en pantalla hasta que se reanude el juego.
+            // El setTimeout solo es para que se quite si el juego no estuviera pausado (escenario improbable aquí).
             setTimeout(() => {
-                levelUpMessageElement.classList.remove('show');
-            }, 2500); // El chiste dura un poco más (2.5 segundos)
+                //levelUpMessageElement.classList.remove('show'); // No ocultar automáticamente si el juego está pausado por nivel
+            }, 30000); // El chiste dura al menos 30 segundos si el usuario no reanuda antes
         }
 
         // Bucle principal del juego
@@ -643,11 +648,12 @@
             if (isPaused) {
                 pauseButton.textContent = "Reanudar";
                 gameMessage.textContent = '¡Juego Pausado!';
-                gameMessage.classList.remove('hidden');
+                gameMessage.classList.remove('hidden'); // Muestra el mensaje de "Juego Pausado!"
                 cancelAnimationFrame(gameLoopId); // Detener el bucle de animación cuando está pausado
             } else {
                 pauseButton.textContent = "Pausar";
-                gameMessage.classList.add('hidden');
+                gameMessage.classList.add('hidden'); // Oculta el mensaje de "Juego Pausado!"
+                levelUpMessageElement.classList.remove('show'); // Oculta el chiste al reanudar
                 lastUpdateTime = performance.now();
                 gameLoop(performance.now()); // Reanudar el bucle de animación
             }
