@@ -70,9 +70,9 @@
             transform: translate(-50%, -50%) scale(1.1);
         }
 
-        /* Estilo para el botón de pausa */
-        .pause-button {
-            background-color: #FFC107; /* Amarillo pastel */
+        /* Estilo para los botones de control (Pausa, Inicio/Reiniciar) */
+        .game-button {
+            background-color: #FFC107; /* Amarillo pastel por defecto */
             color: white;
             font-weight: bold;
             padding: 0.75rem 1.5rem;
@@ -85,12 +85,26 @@
             margin-top: 10px; /* Espacio superior */
         }
 
-        .pause-button:hover {
-            background-color: #FFA000; /* Amarillo más oscuro al pasar el ratón */
+        .game-button.start-button {
+            background-color: #4CAF50; /* Verde para iniciar/reiniciar */
+        }
+
+        .game-button.pause-button {
+            background-color: #FFC107; /* Amarillo para pausa */
+        }
+
+        .game-button:hover {
             transform: scale(1.05);
         }
 
-        .pause-button:active {
+        .game-button.start-button:hover {
+            background-color: #45a049; /* Verde más oscuro al pasar el ratón */
+        }
+        .game-button.pause-button:hover {
+            background-color: #FFA000; /* Amarillo más oscuro al pasar el ratón */
+        }
+
+        .game-button:active {
             transform: scale(0.98);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
@@ -107,7 +121,7 @@
             #level-up-message {
                 font-size: 1.8em;
             }
-            .pause-button {
+            .game-button {
                 padding: 0.6rem 1.2rem;
                 font-size: 1em;
             }
@@ -121,12 +135,15 @@
             Puntuación: <span id="score">0</span> | Nivel: <span id="level">1</span> | Siguiente: <span id="next-piece-display"></span>
         </div>
         <canvas id="tetrisCanvas"></canvas>
-        <div id="game-message" class="text-2xl font-bold text-red-500 hidden mt-4"></div>
+        <div id="game-message" class="text-2xl font-bold text-red-500 mt-4"></div>
         <div id="combo-message"></div> <!-- Mensaje de combo -->
         <div id="level-up-message"></div> <!-- Mensaje de subir de nivel -->
 
-        <!-- Botón de Pausa -->
-        <button id="pauseButton" class="pause-button">Pausar</button>
+        <!-- Botones de control -->
+        <div class="flex gap-4 mt-2">
+            <button id="startButton" class="game-button start-button">Iniciar Juego</button>
+            <button id="pauseButton" class="game-button pause-button hidden">Pausar</button>
+        </div>
 
         <!-- Los controles táctiles ahora se implementan directamente en el canvas -->
     </div>
@@ -159,6 +176,7 @@
         let currentFallInterval = BASE_FALL_INTERVAL; // Intervalo de caída actual
         let nextLevelScoreThreshold = 2000; // Puntos necesarios para el siguiente nivel
         let isPaused = false; // Variable para controlar el estado de pausa
+        let gameStarted = false; // Variable para controlar si el juego ha iniciado
 
         const scoreDisplay = document.getElementById('score');
         const levelDisplay = document.getElementById('level');
@@ -166,6 +184,7 @@
         const nextPieceDisplay = document.getElementById('next-piece-display');
         const comboMessageElement = document.getElementById('combo-message');
         const levelUpMessageElement = document.getElementById('level-up-message'); // Nuevo elemento para mensajes de nivel
+        const startButton = document.getElementById('startButton'); // Referencia al nuevo botón de inicio
         const pauseButton = document.getElementById('pauseButton');
 
         // --- Colores Pastel para las Piezas ---
@@ -182,29 +201,7 @@
         // --- Definición de Piezas (Tetrominoes) ---
         // Cada pieza es un array de matrices, representando sus rotaciones.
         // Los números indican el color/tipo de la pieza (índice en COLORS).
-        const TETROMINOES = [
-            // I (Recta)
-            [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [0, 0, 0, 0]],
-            [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]],
-
-            // O (Cuadrado)
-            [[2, 2], [2, 2]],
-
-            // T
-            [[0, 3, 0], [3, 3, 3], [0, 0, 0]],
-            [[3, 0, 0], [3, 3, 0], [3, 0, 0]],
-            [[0, 0, 0], [3, 3, 3], [0, 3, 0]],
-            [[0, 3, 0], [0, 3, 3], [0, 3, 0]],
-
-            // S
-            [[0, 4, 4], [4, 4, 0], [0, 0, 0]],
-            [[4, 0, 0], [4, 4, 0], [0, 4, 0]],
-
-            // Z
-            [[5, 5, 0], [0, 5, 5], [0, 0, 0]],
-            [[0, 5, 0], [5, 5, 0], [5, 0, 0]],
-
-            // J
+        const TETROMINO_SHAPES = {
             'I': { shape: [[1, 1, 1, 1]], colorIndex: 0 },
             'O': { shape: [[1, 1], [1, 1]], colorIndex: 1 },
             'T': { shape: [[0, 1, 0], [1, 1, 1]], colorIndex: 2 },
@@ -314,7 +311,10 @@
                             if (boardY < 0) { // Si la pieza está por encima del tablero (game over)
                                 gameOver = true;
                                 gameMessage.textContent = '¡Game Over!';
-                                gameMessage.classList.remove('hidden');
+                                gameMessage.classList.remove('hidden'); // Asegura que el mensaje de Game Over sea visible
+                                startButton.textContent = "Reiniciar Juego"; // Cambia el texto del botón
+                                startButton.classList.remove('hidden'); // Asegura que el botón sea visible
+                                pauseButton.classList.add('hidden'); // Oculta el botón de pausa
                                 clearInterval(gameLoopId); // Detiene el bucle del juego
                                 return;
                             }
@@ -375,7 +375,10 @@
                 if (currentPiece.collision(0, 0, currentPiece.shape)) { // Si la nueva pieza colisiona al inicio
                     gameOver = true;
                     gameMessage.textContent = '¡Game Over!';
-                    gameMessage.classList.remove('hidden');
+                    gameMessage.classList.remove('hidden'); // Asegura que el mensaje de Game Over sea visible
+                    startButton.textContent = "Reiniciar Juego"; // Cambia el texto del botón
+                    startButton.classList.remove('hidden'); // Asegura que el botón sea visible
+                    pauseButton.classList.add('hidden'); // Oculta el botón de pausa
                     clearInterval(gameLoopId);
                 }
             }
@@ -477,7 +480,7 @@
         function gameLoop(currentTime) {
             gameLoopId = requestAnimationFrame(gameLoop); // Solicita el siguiente frame
 
-            if (gameOver || isPaused) return; // Si está pausado o game over, no actualiza la lógica del juego
+            if (gameOver || isPaused || !gameStarted) return; // Si está pausado, game over, o no ha iniciado, no actualiza
 
             if (currentTime - lastUpdateTime > currentFallInterval) { // Usa el intervalo de caída actual
                 // La pieza cae si no colisiona
@@ -496,30 +499,38 @@
             initBoard();
             score = 0;
             level = 1;
-            linesClearedTotal = 0; // Se mantiene, aunque el score es el principal para el nivel
+            linesClearedTotal = 0;
             currentFallInterval = BASE_FALL_INTERVAL;
-            nextLevelScoreThreshold = 2000; // Reinicia el umbral para el Nivel 1 -> 2
-            isPaused = false; // Asegura que no esté pausado al inicio
-            pauseButton.textContent = "Pausar"; // Restablece el texto del botón
+            nextLevelScoreThreshold = 2000;
+            isPaused = false;
+            gameOver = false;
+            gameStarted = true; // El juego ha iniciado
 
             scoreDisplay.textContent = score;
             levelDisplay.textContent = level;
-            gameMessage.classList.add('hidden');
+            gameMessage.classList.add('hidden'); // Oculta el mensaje de inicio/game over
             comboMessageElement.classList.remove('show'); // Esconde mensajes de combo
             levelUpMessageElement.classList.remove('show'); // Esconde mensajes de nivel
-            gameOver = false;
+
+            // Oculta el botón de inicio y muestra el de pausa
+            startButton.classList.add('hidden');
+            pauseButton.classList.remove('hidden');
+            pauseButton.textContent = "Pausar"; // Restablece el texto del botón
+
             currentPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
             nextPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
-            currentPiece.drawNextPiece(); // Muestra la primera siguiente pieza
-            lastUpdateTime = performance.now(); // Inicializa el tiempo
-            if (gameLoopId) { // Asegura que no haya múltiples loops corriendo
+            currentPiece.drawNextPiece();
+            lastUpdateTime = performance.now();
+            if (gameLoopId) {
                 cancelAnimationFrame(gameLoopId);
             }
-            gameLoopId = requestAnimationFrame(gameLoop); // Inicia el loop del juego
+            gameLoopId = requestAnimationFrame(gameLoop);
         }
 
         // --- Controles de Teclado ---
         document.addEventListener('keydown', e => {
+            if (!gameStarted) return; // No procesar teclas si el juego no ha iniciado
+
             if (gameOver) {
                 if (e.key === 'Enter') {
                     startGame(); // Reinicia el juego con Enter
@@ -527,7 +538,7 @@
                 return;
             }
 
-            if (isPaused && e.key !== 'p' && e.key !== 'P') return; // No procesar teclas si está pausado, excepto 'p' para despausar
+            if (isPaused && e.key !== 'p' && e.key !== 'P') return;
 
             switch (e.key) {
                 case 'ArrowLeft':
@@ -543,16 +554,16 @@
                     currentPiece.rotate();
                     break;
                 case ' ': // Espacio para soltar la pieza
-                    while (currentPiece.move(0, 1)); // Mueve hacia abajo hasta que colisione
+                    while (currentPiece.move(0, 1));
                     currentPiece.lock();
                     break;
-                case 'p': // Tecla 'p' para pausa
+                case 'p':
                 case 'P':
                     togglePause();
                     break;
             }
-            if (!isPaused) { // Solo redibujar si no está pausado
-                drawBoard(); // Redibuja el tablero y la pieza después del movimiento
+            if (!isPaused) {
+                drawBoard();
                 currentPiece.draw();
             }
         });
@@ -560,29 +571,30 @@
         // --- Controles Táctiles en el Canvas ---
         let touchStartX = 0;
         let touchStartY = 0;
-        // Ajustes para hacer los controles más rápidos
-        const tapThreshold = 10; // px para un "toque" (movimiento insignificante)
-        const swipeThreshold = 30; // px mínimo para un "deslizamiento"
-        const hardDropSwipeThreshold = 100; // px mínimo para un "deslizamiento fuerte hacia abajo" (hard drop)
+        const tapThreshold = 10;
+        const swipeThreshold = 30;
+        const hardDropSwipeThreshold = 100;
 
         canvas.addEventListener('touchstart', e => {
-            e.preventDefault(); // Previene el scroll o zoom del navegador
-            if (gameOver) {
-                startGame(); // Reinicia el juego si está en Game Over
+            e.preventDefault();
+            if (!gameStarted) { // Si el juego no ha iniciado, un toque en el canvas no hace nada (se usa el botón de inicio)
                 return;
             }
-            if (isPaused) return; // Ignora toques si está pausado
+            if (gameOver) { // Si el juego ha terminado, presionar el canvas (que no sea el botón) no hace nada
+                return;
+            }
+            if (isPaused) return;
 
             touchStartX = e.touches[0].clientX;
             touchStartY = e.touches[0].clientY;
         });
 
         canvas.addEventListener('touchmove', e => {
-            e.preventDefault(); // Previene el scroll o zoom del navegador
+            e.preventDefault();
         });
 
         canvas.addEventListener('touchend', e => {
-            if (gameOver || isPaused) return; // Si el juego terminó o está pausado, no procesar más toques de juego
+            if (!gameStarted || gameOver || isPaused) return;
 
             const touchEndX = e.changedTouches[0].clientX;
             const touchEndY = e.changedTouches[0].clientY;
@@ -590,72 +602,77 @@
             const deltaX = touchEndX - touchStartX;
             const deltaY = touchEndY - touchStartY;
 
-            // Determinar si fue un deslizamiento o un toque
             const isTap = Math.abs(deltaX) < tapThreshold && Math.abs(deltaY) < tapThreshold;
 
             if (isTap) {
-                // Es un toque: Rotar pieza
                 currentPiece.rotate();
             } else {
-                // Es un deslizamiento
                 if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
-                    // Deslizamiento horizontal
                     if (deltaX < 0) {
-                        // Izquierda
                         currentPiece.move(-1, 0);
                     } else {
-                        // Derecha
                         currentPiece.move(1, 0);
                     }
                 } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > swipeThreshold) {
-                    // Deslizamiento vertical
                     if (deltaY > 0) {
-                        // Abajo
                         if (Math.abs(deltaY) > hardDropSwipeThreshold) {
-                            // Hard drop (caída instantánea)
                             while (currentPiece.move(0, 1));
                             currentPiece.lock();
                         } else {
-                            // Soft drop (bajar una fila rápidamente)
                             currentPiece.move(0, 1);
                         }
                     }
-                    // No hay acción para deslizar hacia arriba por ahora
                 }
             }
-            drawBoard(); // Redibuja el tablero y la pieza después del movimiento
+            drawBoard();
             currentPiece.draw();
         });
 
         // --- Funciones de Pausa ---
         function togglePause() {
+            if (!gameStarted || gameOver) return; // No permitir pausa si el juego no ha iniciado o ya terminó
+
             isPaused = !isPaused;
             if (isPaused) {
                 pauseButton.textContent = "Reanudar";
                 gameMessage.textContent = '¡Juego Pausado!';
                 gameMessage.classList.remove('hidden');
+                cancelAnimationFrame(gameLoopId); // Detener el bucle de animación cuando está pausado
             } else {
                 pauseButton.textContent = "Pausar";
                 gameMessage.classList.add('hidden');
-                lastUpdateTime = performance.now(); // Resetea el tiempo para evitar caída instantánea al reanudar
-                gameLoop(performance.now()); // Reanuda el bucle del juego
+                lastUpdateTime = performance.now();
+                gameLoop(performance.now()); // Reanudar el bucle de animación
             }
         }
         // Event Listener para el botón de pausa
         pauseButton.addEventListener('click', togglePause);
 
-
-        // Reinicia el juego si está en Game Over y se hace clic en cualquier parte (excepto el botón de pausa)
-        document.addEventListener('click', (e) => {
-            if (gameOver && e.target !== canvas && e.target !== pauseButton) { // Excluye el canvas y el botón de pausa
+        // --- Funciones de Inicio de Juego ---
+        startButton.addEventListener('click', () => {
+            if (gameOver) {
+                // Si el juego terminó, reiniciar
                 startGame();
+            } else if (!gameStarted) {
+                // Si el juego aún no ha iniciado, iniciar por primera vez
+                startGame();
+            } else if (isPaused) {
+                // Si el juego está pausado, reanudar
+                togglePause();
             }
         });
 
-
-        // Asegura que el juego se inicie una vez el DOM esté completamente cargado
+        // --- Inicialización al cargar la ventana ---
         window.onload = function() {
-            startGame();
+            initBoard(); // Inicializa el tablero
+            drawBoard(); // Dibuja el tablero vacío
+            gameMessage.textContent = 'Pulsa "Iniciar Juego" para jugar';
+            gameMessage.classList.remove('hidden'); // Muestra el mensaje de inicio
+            startButton.textContent = "Iniciar Juego";
+            startButton.classList.remove('hidden'); // Asegura que el botón de inicio sea visible
+            pauseButton.classList.add('hidden'); // Asegura que el botón de pausa esté oculto al inicio
+
+            // No iniciar gameLoop aquí, se iniciará con el botón
         };
     </script>
 </body>
