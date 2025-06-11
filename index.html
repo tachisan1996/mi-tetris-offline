@@ -12,7 +12,7 @@
             border-radius: 12px; /* Esquinas redondeadas para el canvas */
             display: block;
             margin: 0 auto;
-            touch-action: none; /* Previene el desplazamiento por defecto en móviles */
+            touch-action: none; /* MUY IMPORTANTE: Previene el desplazamiento por defecto en móviles */
         }
 
         /* Estilo general para el cuerpo de la página */
@@ -43,54 +43,6 @@
             position: relative; /* Para posicionar el mensaje de combo */
         }
 
-        /* Estilo para los botones de control */
-        .control-button {
-            background-color: #90CDF4; /* bg-blue-300 */
-            color: white; /* text-white */
-            font-weight: bold; /* font-bold */
-            padding: 0.75rem 1.5rem; /* py-3 px-6 */
-            border-radius: 0.5rem; /* rounded-lg */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
-            transition-property: all; /* transition */
-            transition-duration: 300ms; /* duration-300 */
-            transition-timing-function: ease-in-out; /* ease-in-out */
-            transform: scale(1); /* transform */
-            min-width: 80px; /* Ancho mínimo para los botones */
-            min-height: 50px; /* Alto mínimo para los botones */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.2em;
-            border: none; /* Eliminar el borde predeterminado del botón */
-            cursor: pointer; /* Cambiar el cursor a puntero al pasar el ratón */
-        }
-
-        .control-button:hover {
-            background-color: #63B3ED; /* hover:bg-blue-400 */
-            transform: scale(1.05); /* hover:scale-105 */
-        }
-
-        /* Estilos específicos para la sección de controles táctiles */
-        .touch-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            width: 100%;
-            max-width: 400px; /* Limita el ancho de los controles */
-        }
-
-        .touch-row {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        /* Animación para los botones al ser presionados */
-        .control-button:active {
-            transform: scale(0.98);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
         /* Estilo para el mensaje de combo */
         #combo-message {
             position: absolute;
@@ -118,18 +70,6 @@
                 padding: 15px;
                 gap: 15px;
             }
-            .control-button {
-                min-width: 70px;
-                min-height: 45px;
-                font-size: 1em;
-                padding: 10px 20px;
-            }
-            .touch-controls {
-                gap: 10px;
-            }
-            .touch-row {
-                gap: 10px;
-            }
             #combo-message {
                 font-size: 2.2em;
             }
@@ -146,20 +86,8 @@
         <div id="game-message" class="text-2xl font-bold text-red-500 hidden mt-4"></div>
         <div id="combo-message"></div> <!-- Mensaje de combo -->
 
-        <!-- Controles Táctiles -->
-        <div class="touch-controls mt-6">
-            <div class="touch-row">
-                <button id="btnRotate" class="control-button">Rotar</button>
-            </div>
-            <div class="touch-row">
-                <button id="btnLeft" class="control-button">← Izquierda</button>
-                <button id="btnDown" class="control-button">↓ Abajo</button>
-                <button id="btnRight" class="control-button">Derecha →</button>
-            </div>
-            <div class="touch-row">
-                <button id="btnDrop" class="control-button w-full">Soltar</button>
-            </div>
-        </div>
+        <!-- Los controles táctiles ahora se implementan directamente en el canvas -->
+        <!-- No hay botones explícitos aquí para los controles de movimiento/rotación -->
     </div>
 
     <script>
@@ -169,7 +97,7 @@
 
         const COLS = 10; // Columnas del tablero
         const ROWS = 20; // Filas del tablero
-        const BLOCK_SIZE = 30; // Tamaño de cada bloque en píxeles
+        const BLOCK_SIZE = 35; // Tamaño de cada bloque en píxeles (AUMENTADO)
 
         // Ajusta el tamaño del canvas
         canvas.width = COLS * BLOCK_SIZE;
@@ -185,10 +113,10 @@
         let lastUpdateTime = 0; // Para controlar el tiempo de caída de la pieza
 
         let level = 1; // Nivel actual del juego
-        let linesClearedTotal = 0; // Total de líneas limpiadas en el juego
-        const LINES_PER_LEVEL = 10; // Número de líneas para subir de nivel
+        let linesClearedTotal = 0; // Total de líneas limpiadas en el juego (se mantiene para estadísticas, pero el score define el nivel)
         const BASE_FALL_INTERVAL = 500; // Intervalo de caída base en ms (0.5 segundos)
         let currentFallInterval = BASE_FALL_INTERVAL; // Intervalo de caída actual
+        let nextLevelScoreThreshold = 2000; // Puntos necesarios para el siguiente nivel
 
         const scoreDisplay = document.getElementById('score');
         const levelDisplay = document.getElementById('level');
@@ -385,12 +313,18 @@
 
                     linesClearedTotal += linesCleared; // Actualiza el total de líneas limpiadas
 
-                    // Verifica si se sube de nivel
-                    if (level < 10 && linesClearedTotal >= level * LINES_PER_LEVEL) { // Máximo 10 niveles
+                    // Verifica si se sube de nivel basado en la puntuación
+                    if (level < 10 && score >= nextLevelScoreThreshold) { // Máximo 10 niveles
                         level++;
                         levelDisplay.textContent = level;
-                        // Reduce el intervalo de caída para aumentar la velocidad
-                        currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level - 1) * 40); // Mínimo 50ms
+                        // Recalcula el umbral de puntos para el siguiente nivel
+                        // Nivel 1 a 2: 2000, Nivel 2 a 3: 3000, Nivel 3 a 4: 4000, etc.
+                        nextLevelScoreThreshold = 2000 + (level - 1) * 1000;
+
+                        // Reduce el intervalo de caída para aumentar la velocidad (dificultad)
+                        // currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level - 1) * 40); // Mínimo 50ms
+                        // Ajuste para que la dificultad aumente un poco más rápido
+                        currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 50));
                     }
 
                     // Efectos especiales para combos
@@ -509,8 +443,9 @@
             initBoard();
             score = 0;
             level = 1;
-            linesClearedTotal = 0;
+            linesClearedTotal = 0; // Se mantiene, aunque el score es el principal para el nivel
             currentFallInterval = BASE_FALL_INTERVAL;
+            nextLevelScoreThreshold = 2000; // Reinicia el umbral para el Nivel 1 -> 2
 
             scoreDisplay.textContent = score;
             levelDisplay.textContent = level;
@@ -557,54 +492,73 @@
             currentPiece.draw();
         });
 
-        // --- Controles Táctiles ---
-        const btnLeft = document.getElementById('btnLeft');
-        const btnRight = document.getElementById('btnRight');
-        const btnDown = document.getElementById('btnDown');
-        const btnRotate = document.getElementById('btnRotate');
-        const btnDrop = document.getElementById('btnDrop');
+        // --- Controles Táctiles en el Canvas ---
+        let touchStartX = 0;
+        let touchStartY = 0;
+        const tapThreshold = 15; // px para un "toque" (movimiento insignificante)
+        const swipeThreshold = 50; // px mínimo para un "deslizamiento"
+        const hardDropSwipeThreshold = 150; // px mínimo para un "deslizamiento fuerte hacia abajo" (hard drop)
 
-        // Función de handler para los botones
-        function handleTouchControl(action) {
+        canvas.addEventListener('touchstart', e => {
+            e.preventDefault(); // Previene el scroll o zoom del navegador
             if (gameOver) {
-                startGame(); // Si el juego termina, cualquier botón reinicia
+                startGame(); // Reinicia el juego si está en Game Over
                 return;
             }
-            switch (action) {
-                case 'left':
-                    currentPiece.move(-1, 0);
-                    break;
-                case 'right':
-                    currentPiece.move(1, 0);
-                    break;
-                case 'down':
-                    currentPiece.move(0, 1);
-                    break;
-                case 'rotate':
-                    currentPiece.rotate();
-                    break;
-                case 'drop':
-                    while (currentPiece.move(0, 1));
-                    currentPiece.lock();
-                    break;
-            }
-            drawBoard();
-            currentPiece.draw();
-        }
-
-        btnLeft.addEventListener('click', () => handleTouchControl('left'));
-        btnRight.addEventListener('click', () => handleTouchControl('right'));
-        btnDown.addEventListener('click', () => handleTouchControl('down'));
-        btnRotate.addEventListener('click', () => handleTouchControl('rotate'));
-        btnDrop.addEventListener('click', () => handleTouchControl('drop'));
-
-        // Reinicia el juego si está en Game Over y se hace clic en cualquier botón de control
-        // Se añade un listener al documento para reiniciar el juego si gameOver es true y se hace clic en cualquier parte.
-        document.addEventListener('click', (e) => {
-            if (gameOver && e.target !== canvas && !e.target.closest('.control-button')) {
-                startGame();
-            }
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
         });
+
+        canvas.addEventListener('touchmove', e => {
+            e.preventDefault(); // Previene el scroll o zoom del navegador
+        });
+
+        canvas.addEventListener('touchend', e => {
+            if (gameOver) return; // Si el juego terminó, no procesar más toques de juego
+
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+
+            const deltaX = touchEndX - touchStartX;
+            const deltaY = touchEndY - touchStartY;
+
+            // Determinar si fue un deslizamiento o un toque
+            const isTap = Math.abs(deltaX) < tapThreshold && Math.abs(deltaY) < tapThreshold;
+
+            if (isTap) {
+                // Es un toque: Rotar pieza
+                currentPiece.rotate();
+            } else {
+                // Es un deslizamiento
+                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
+                    // Deslizamiento horizontal
+                    if (deltaX < 0) {
+                        // Izquierda
+                        currentPiece.move(-1, 0);
+                    } else {
+                        // Derecha
+                        currentPiece.move(1, 0);
+                    }
+                } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > swipeThreshold) {
+                    // Deslizamiento vertical
+                    if (deltaY > 0) {
+                        // Abajo
+                        if (Math.abs(deltaY) > hardDropSwipeThreshold) {
+                            // Hard drop (caída instantánea)
+                            while (currentPiece.move(0, 1));
+                            currentPiece.lock();
+                        } else {
+                            // Soft drop (bajar una fila rápidamente)
+                            currentPiece.move(0, 1);
+                        }
+                    }
+                    // No hay acción para deslizar hacia arriba por ahora
+                }
+            }
+            drawBoard(); // Redibuja el tablero y la pieza después del movimiento
+            currentPiece.draw();
+        });
+
 
         // Asegura que el juego se inicie una vez el DOM esté completamente cargado
         window.onload = function() {
