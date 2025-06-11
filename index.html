@@ -161,6 +161,63 @@
         canvas.width = COLS * BLOCK_SIZE;
         canvas.height = ROWS * BLOCK_SIZE;
 
+        // --- Definición de Múltiples Paletas de Colores ---
+        const COLOR_PALETTES = [
+            // Palette 0: Original Intenso
+            [
+                '#FF69B4', // Rosa Fuerte (Hot Pink) - I
+                '#FFD700', // Oro (Gold) - O
+                '#00BFFF', // Azul Cielo Profundo (Deep Sky Blue) - T
+                '#32CD32', // Verde Lima (Lime Green) - S
+                '#FF4500', // Naranja Rojo (Orange Red) - Z
+                '#4169E1', // Azul Real (Royal Blue) - J
+                '#9932CC'  // Púrpura (Dark Orchid) - L
+            ],
+            // Palette 1: Neón / Brillante
+            [
+                '#FF00FF', // Magenta - I
+                '#FFFF00', // Amarillo Puro - O
+                '#00FFFF', // Cian - T
+                '#00FF00', // Verde Brillante - S
+                '#FF0000', // Rojo Brillante - Z
+                '#0000FF', // Azul Brillante - J
+                '#8A2BE2'  // Azul Violeta - L
+            ],
+            // Palette 2: Naturaleza / Tierra
+            [
+                '#9ACD32', // Verde Amarillo - I
+                '#DAA520', // Oro Viejo - O
+                '#6B8E23', // Verde Oliva - T
+                '#5F9EA0', // Azul Cadete - S
+                '#D2691E', // Chocolate - Z
+                '#8B4513', // Marrón Silla - J
+                '#A0522D'  // Sienna - L
+            ],
+            // Palette 3: Oscuro / Galáctico
+            [
+                '#4B0082', // Indigo - I
+                '#1E90FF', // Azul Dodger - O
+                '#BA55D3', // Orquídea Media - T
+                '#20B2AA', // Azul Verde Claro - S
+                '#FF1493', // Rosa Profundo - Z
+                '#7B68EE', // Azul Pizarra Medio - J
+                '#4682B4'  // Acero Azul - L
+            ],
+            // Puedes añadir más paletas aquí para niveles más altos
+            [
+                '#F08080', // Coral Claro
+                '#ADD8E6', // Azul Claro
+                '#90EE90', // Verde Claro
+                '#FFB6C1', // Rosa Claro
+                '#DDA0DD', // Ciruela
+                '#87CEEB', // Azul Cielo Claro
+                '#FFDAB9'  // Melocotón
+            ]
+        ];
+
+        // Se inicializa la paleta de colores actual
+        let COLORS = COLOR_PALETTES[0];
+
         // --- Variables del Juego ---
         let board = []; // El tablero de juego
         let currentPiece; // La pieza actual en juego
@@ -187,17 +244,6 @@
         const startButton = document.getElementById('startButton'); // Referencia al nuevo botón de inicio
         const pauseButton = document.getElementById('pauseButton');
 
-        // --- Colores Intensos para las Piezas ---
-        const COLORS = [
-            '#FF69B4', // Rosa Fuerte (Hot Pink) - I
-            '#FFD700', // Oro (Gold) - O
-            '#00BFFF', // Azul Cielo Profundo (Deep Sky Blue) - T
-            '#32CD32', // Verde Lima (Lime Green) - S
-            '#FF4500', // Naranja Rojo (Orange Red) - Z
-            '#4169E1', // Azul Real (Royal Blue) - J
-            '#9932CC'  // Púrpura (Dark Orchid) - L
-        ];
-
         // --- Definición de Piezas (Tetrominoes) ---
         // Cada pieza es un array de matrices, representando sus rotaciones.
         // Los números indican el color/tipo de la pieza (índice en COLORS).
@@ -216,7 +262,7 @@
             constructor(shapeType) {
                 const { shape, colorIndex } = TETROMINO_SHAPES[shapeType];
                 this.shape = shape;
-                this.color = COLORS[colorIndex];
+                this.color = COLORS[colorIndex]; // Ahora COLORS es dinámico
                 this.x = Math.floor(COLS / 2) - Math.floor(shape[0].length / 2); // Posición inicial X
                 this.y = 0; // Posición inicial Y
                 this.shapeType = shapeType; // Guarda el tipo de forma (para mostrar la siguiente)
@@ -354,10 +400,15 @@
                         // Reduce el intervalo de caída para aumentar la velocidad (dificultad)
                         currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 75)); // Aumenta la velocidad más rápido
 
-                        // Pausar el juego y mostrar el chiste
+                        // Pausar el juego, limpiar el tablero y mostrar el chiste
                         isPaused = true;
                         pauseButton.textContent = "Reanudar"; // Actualiza el texto del botón de pausa
                         cancelAnimationFrame(gameLoopId); // Detiene el bucle del juego
+
+                        initBoard(); // Limpia el tablero al pasar de nivel
+                        drawBoard(); // Dibuja el tablero vacío después de limpiar
+                        COLORS = COLOR_PALETTES[(level -1) % COLOR_PALETTES.length]; // Cambia la paleta de colores
+                        
                         displayLevelUpMessage(); // Muestra el mensaje de nivel (chiste)
                     }
 
@@ -479,7 +530,7 @@
         // Muestra un chiste de nivel en la pantalla
         function displayLevelUpMessage() {
             const randomIndex = Math.floor(Math.random() * levelUpJokes.length);
-            levelUpMessageElement.textContent = `¡Nivel ${level}! \n` + levelUpJokes[randomIndex]; // Añade salto de línea para chiste
+            levelUpMessageElement.innerHTML = `¡Nivel ${level}! <br>` + levelUpJokes[randomIndex]; // Añade salto de línea para chiste
             levelUpMessageElement.classList.add('show');
             // El chiste se quedará en pantalla hasta que se reanude el juego.
             // El setTimeout solo es para que se quite si el juego no estuviera pausado (escenario improbable aquí).
@@ -528,6 +579,9 @@
             startButton.classList.add('hidden');
             pauseButton.classList.remove('hidden');
             pauseButton.textContent = "Pausar"; // Restablece el texto del botón
+
+            // Asigna la paleta de colores inicial para el nivel 1
+            COLORS = COLOR_PALETTES[0];
 
             currentPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
             nextPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
