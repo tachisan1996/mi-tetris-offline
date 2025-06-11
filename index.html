@@ -155,7 +155,7 @@
 
         const COLS = 10; // Columnas del tablero
         const ROWS = 20; // Filas del tablero
-        const BLOCK_SIZE = 35; // Tamaño de cada bloque en píxeles
+        const BLOCK_SIZE = 28; // Tamaño de cada bloque en píxeles (REDUCIDO)
 
         // Ajusta el tamaño del canvas
         canvas.width = COLS * BLOCK_SIZE;
@@ -532,11 +532,8 @@
             const randomIndex = Math.floor(Math.random() * levelUpJokes.length);
             levelUpMessageElement.innerHTML = `¡Nivel ${level}! <br>` + levelUpJokes[randomIndex]; // Añade salto de línea para chiste
             levelUpMessageElement.classList.add('show');
-            // El chiste se quedará en pantalla hasta que se reanude el juego.
-            // El setTimeout solo es para que se quite si el juego no estuviera pausado (escenario improbable aquí).
-            setTimeout(() => {
-                //levelUpMessageElement.classList.remove('show'); // No ocultar automáticamente si el juego está pausado por nivel
-            }, 30000); // El chiste dura al menos 30 segundos si el usuario no reanuda antes
+            // El chiste se quedará en pantalla hasta que se reanude el juego con el botón
+            // No hay setTimeout para ocultarlo automáticamente en este caso
         }
 
         // Bucle principal del juego
@@ -637,9 +634,9 @@
         // --- Controles Táctiles en el Canvas ---
         let touchStartX = 0;
         let touchStartY = 0;
-        const tapThreshold = 10; // Reducido para mayor sensibilidad al toque
-        const swipeThreshold = 25; // Reducido para mayor sensibilidad al deslizamiento
-        const hardDropSwipeThreshold = 90; // Reducido para hacer el hard drop más fácil de activar
+        const tapThreshold = 8; // Reducido para mayor sensibilidad al toque
+        const swipeThreshold = 20; // Reducido para mayor sensibilidad al deslizamiento
+        const hardDropSwipeThreshold = 70; // Reducido para hacer el hard drop más fácil de activar
 
         canvas.addEventListener('touchstart', e => {
             e.preventDefault();
