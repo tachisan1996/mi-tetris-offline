@@ -3,740 +3,1220 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tetris Pastel Intenso</title>
+    <title>Minijuegos Divertidos</title>
     <style>
-        /* Estilo personalizado para el canvas del juego */
-        canvas {
-            background-color: #e0e7ee; /* Un gris azulado muy claro para un mejor contraste con colores intensos */
-            border: 4px solid #7cb9e8; /* Borde azul vibrante */
-            border-radius: 12px; /* Esquinas redondeadas para el canvas */
-            display: block;
-            margin: 0 auto;
-            touch-action: none; /* MUY IMPORTANTE: Previene el desplazamiento por defecto en móviles */
-        }
-
-        /* Estilo general para el cuerpo de la página */
+        /* Estilos generales para el portal */
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #a7d9f7 0%, #b2e6b2 100%); /* Degradado suave pero más vivo */
+            background: linear-gradient(135deg, #a7d9f7 0%, #b2e6b2 100%); /* Pastel gradient */
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* Align to start to leave space for title */
             align-items: center;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
-            color: #2d3748; /* Color de texto más oscuro para legibilidad */
+            color: #2d3748;
         }
 
-        /* Contenedor principal del juego */
+        h1 {
+            color: #007bff; /* Vibrant blue for main title */
+            margin-bottom: 30px;
+            font-size: 2.8em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Main container for portal or game */
         .game-container {
+            display: flex; /* Flex for portal and games */
+            flex-direction: column;
+            align-items: center;
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            padding: 25px;
+            gap: 20px;
+            width: 100%; /* Occupy full available width */
+            max-width: 900px; /* Limit max width */
+            box-sizing: border-box; /* Include padding in width */
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Responsive columns */
+            gap: 25px;
+            padding: 20px;
+            width: 100%; /* Occupy 100% of container */
+        }
+
+        .game-card {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #ffffff; /* Fondo blanco para el contenedor */
-            border-radius: 20px; /* Esquinas más redondeadas */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
-            padding: 25px;
-            gap: 20px; /* Espacio entre elementos */
-            position: relative; /* Para posicionar los mensajes */
+            text-align: center;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            cursor: pointer;
         }
 
-        /* Estilo para el mensaje de combo */
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-icon {
+            font-size: 4em; /* Large icon size */
+            margin-bottom: 10px;
+        }
+
+        .game-card h2 {
+            font-size: 1.5em;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .game-card p {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 15px;
+            flex-grow: 1; /* Allows description to take up space */
+        }
+
+        .play-button {
+            background-color: #28a745; /* Green for play */
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .play-button:hover {
+            background-color: #218838;
+        }
+
+        .back-button {
+            background-color: #6c757d; /* Gray for back */
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .back-button:hover {
+            background-color: #5a6268;
+        }
+
+        /* Container for individual games (hidden by default) */
+        .game-screen {
+            display: none; /* Hidden by default */
+            /* Layout properties (flex, align-items, etc.) apply when shown */
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px; /* Max width for individual games */
+            background-color: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            box-sizing: border-box;
+            gap: 15px;
+        }
+
+        /* Tetris specific styles (copied from previous version) */
+        #tetrisCanvas {
+            background-color: #e0e7ee;
+            border: 4px solid #7cb9e8;
+            border-radius: 12px;
+            display: block;
+            margin: 0 auto;
+            touch-action: none;
+        }
         #combo-message, #level-up-message {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 3.2em; /* Un poco más grande */
+            font-size: 3.2em;
             font-weight: bold;
-            color: #ef4444; /* Rojo vibrante */
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4); /* Sombra más fuerte */
+            color: #ef4444;
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4);
             z-index: 10;
             opacity: 0;
             transition: opacity 0.3s ease-out, transform 0.3s ease-out;
-            pointer-events: none; /* Permite clics a través del mensaje */
-            text-align: center; /* Centra el texto */
+            pointer-events: none;
+            text-align: center;
         }
-
         #level-up-message {
-            color: #10B981; /* Verde más intenso para mensajes de nivel */
-            font-size: 2em; /* Ajustado para ser más pequeño y legible */
+            color: #10B981;
+            font-size: 2em;
         }
-
         #combo-message.show, #level-up-message.show {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1.15); /* Efecto de escala más pronunciado */
+            transform: translate(-50%, -50%) scale(1.15);
         }
-
-        /* Estilo para los botones de control (Pausa, Inicio/Reiniciar) */
-        .game-button {
-            background-color: #FFC107; /* Amarillo pastel por defecto */
-            color: white;
-            font-weight: bold;
-            padding: 0.75rem 1.5rem;
-            border-radius: 0.5rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease-in-out;
-            transform: scale(1);
-            border: none;
-            cursor: pointer;
-            margin-top: 10px; /* Espacio superior */
-        }
-
         .game-button.start-button {
-            background-color: #10B981; /* Verde más intenso para iniciar/reiniciar */
+            background-color: #10B981;
         }
-
         .game-button.pause-button {
-            background-color: #F59E0B; /* Naranja más intenso para pausa */
+            background-color: #F59E0B;
         }
-
-        .game-button:hover {
-            transform: scale(1.05);
-        }
-
         .game-button.start-button:hover {
-            background-color: #059669; /* Verde más oscuro al pasar el ratón */
+            background-color: #059669;
         }
         .game-button.pause-button:hover {
-            background-color: #D97706; /* Naranja más oscuro al pasar el ratón */
+            background-color: #D97706;
         }
-
         .game-button:active {
             transform: scale(0.98);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         }
-
-        /* Adaptabilidad para pantallas pequeñas */
         @media (max-width: 640px) {
-            .game-container {
-                padding: 15px;
+            .game-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
                 gap: 15px;
+            }
+            .game-card {
+                padding: 15px;
+            }
+            .game-icon {
+                font-size: 3em;
+            }
+            .game-card h2 {
+                font-size: 1.2em;
+            }
+            .game-card p {
+                font-size: 0.8em;
             }
             #combo-message {
                 font-size: 2.5em;
             }
             #level-up-message {
-                font-size: 1.5em; /* Ajustado para pantallas pequeñas */
+                font-size: 1.5em;
             }
             .game-button {
                 padding: 0.6rem 1.2rem;
                 font-size: 1em;
             }
         }
+
+        /* Crossword game styles */
+        #crossword-grid {
+            display: grid;
+            border: 2px solid #6c757d;
+            margin-bottom: 20px;
+        }
+        .crossword-cell {
+            width: 45px; /* Increased cell size */
+            height: 45px; /* Increased cell size */
+            border: 1px solid #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em; /* Larger font */
+            font-weight: bold;
+            text-transform: uppercase;
+            background-color: white;
+            box-sizing: border-box; /* Include padding/border in size */
+            position: relative; /* For numbering in the corner */
+        }
+        .crossword-cell.black {
+            background-color: #333;
+            border: 1px solid #333;
+        }
+        .crossword-cell.active {
+            background-color: #fffacd; /* Light yellow */
+            border: 2px solid #f0e68c; /* Darker yellow */
+        }
+        .crossword-cell input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            background: transparent;
+            font-size: inherit;
+            font-weight: inherit;
+            text-transform: uppercase;
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .clues-container {
+            display: flex;
+            gap: 30px;
+            width: 100%;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .clues-column {
+            flex: 1;
+            min-width: 250px;
+        }
+        .clues-column h3 {
+            color: #065F46;
+            margin-bottom: 10px;
+        }
+        .clues-column ol {
+            list-style-type: decimal;
+            padding-left: 20px;
+        }
+        .clues-column li {
+            margin-bottom: 5px;
+            font-size: 0.95em;
+            color: #555;
+        }
+        #crossword-message {
+            margin-top: 15px;
+            font-weight: bold;
+            color: #333;
+        }
+        #crossword-check-button, #crossword-reset-button {
+            background-color: #10B981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 15px;
+        }
+        #crossword-check-button:hover, #crossword-reset-button:hover {
+            background-color: #065F46;
+        }
+
+        /* Numbering in the corner of crossword cells */
+        .crossword-cell .clue-number {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            font-size: 0.7em;
+            color: #777;
+            pointer-events: none; /* Does not interfere with input */
+            background-color: transparent; /* No background */
+            padding: 1px 2px;
+            border-radius: 3px;
+        }
+
+        #crossword-current-clue-info {
+            font-size: 1.1em;
+            margin-top: 10px;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .difficulty-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .difficulty-buttons .game-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        .difficulty-buttons .game-button:hover {
+            background-color: #0056b3;
+        }
+        .level-message {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e6f7ff;
+            border: 1px solid #91d5ff;
+            border-radius: 10px;
+            color: #2d3748;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .level-message p {
+            margin-bottom: 10px;
+        }
+        .level-message .game-button {
+            margin-top: 10px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
     </style>
 </head>
-<body class="selection:bg-pink-200 selection:text-pink-800">
-    <div class="game-container">
+<body>
+    <!-- Main Game Portal Section -->
+    <div id="game-portal-section" class="game-container">
+        <h1>Minijuegos Divertidos</h1>
+        <div class="game-grid">
+            <!-- Tetris Game Card -->
+            <div class="game-card" data-game-id="tetris">
+                <span class="game-icon">🧱</span>
+                <h2>Tetris Pastel Intenso</h2>
+                <p>¡El clásico juego de bloques con colores vibrantes y chistes!</p>
+                <button class="play-button">Jugar</button>
+            </div>
+
+            <!-- Crossword Game Card -->
+            <div class="game-card" data-game-id="crossword">
+                <span class="game-icon">📝</span> <!-- Pencil/paper icon -->
+                <h2>Crucigrama Cultural</h2>
+                <p>¡Pon a prueba tus conocimientos con este divertido crucigrama!</p>
+                <button class="play-button">Jugar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tetris Game Section (Hidden by default) -->
+    <div id="tetris-game-section" class="game-screen">
         <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 mb-4 text-center">Tetris Pastel Intenso</h1>
         <div id="game-info" class="text-lg font-semibold text-gray-700 mb-3 text-center">
             Puntuación: <span id="score">0</span> | Nivel: <span id="level">1</span> | Siguiente: <span id="next-piece-display"></span>
         </div>
         <canvas id="tetrisCanvas"></canvas>
         <div id="game-message" class="text-2xl font-bold text-red-500 mt-4"></div>
-        <div id="combo-message"></div> <!-- Mensaje de combo -->
-        <div id="level-up-message"></div> <!-- Mensaje de subir de nivel -->
+        <div id="combo-message"></div>
+        <div id="level-up-message"></div>
 
-        <!-- Botones de control -->
         <div class="flex gap-4 mt-2">
-            <button id="startButton" class="game-button start-button">Iniciar Juego</button>
-            <button id="pauseButton" class="game-button pause-button hidden">Pausar</button>
+            <button id="tetris-start-button" class="game-button start-button">Iniciar Juego</button>
+            <button id="tetris-pause-button" class="game-button pause-button hidden">Pausar</button>
+        </div>
+        <button id="back-to-portal-tetris" class="back-button">Volver a Minijuegos</button>
+    </div>
+
+    <!-- Crossword Game Section (Hidden by default) -->
+    <div id="crossword-game-section" class="game-screen">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 mb-4 text-center">Crucigrama Cultural</h1>
+        
+        <div class="difficulty-buttons">
+            <button data-difficulty="easy" class="game-button">Fácil</button>
+            <button data-difficulty="medium" class="game-button">Medio</button>
+            <button data-difficulty="hard" class="game-button">Difícil</button>
         </div>
 
-        <!-- Los controles táctiles ahora se implementan directamente en el canvas -->
+        <div id="crossword-game-area">
+            <div id="crossword-grid"></div>
+            <div id="crossword-current-clue-info"></div> <!-- Current clue information -->
+            <div class="clues-container">
+                <div class="clues-column">
+                    <h3>Horizontales</h3>
+                    <ol id="crossword-clues-across"></ol>
+                </div>
+                <div class="clues-column">
+                    <h3>Verticales</h3>
+                    <ol id="crossword-clues-down"></ol>
+                </div>
+            </div>
+            <div id="crossword-message"></div>
+            <div class="flex gap-4">
+                <button id="crossword-check-button" class="game-button start-button">Comprobar</button>
+                <button id="crossword-reset-button" class="game-button pause-button">Reiniciar</button>
+            </div>
+        </div>
+
+        <div id="level-complete-message" class="level-message hidden">
+            <p id="level-complete-text"></p>
+            <button id="next-crossword-button" class="game-button hidden">Siguiente Nivel</button>
+        </div>
+
+        <button id="back-to-portal-crossword" class="back-button">Volver a Minijuegos</button>
     </div>
 
     <script>
-        // --- Configuración del Canvas ---
-        const canvas = document.getElementById('tetrisCanvas');
-        const ctx = canvas.getContext('2d');
+        // --- Global Navigation Variables ---
+        const gamePortalSection = document.getElementById('game-portal-section');
+        const tetrisGameSection = document.getElementById('tetris-game-section');
+        const crosswordGameSection = document.getElementById('crossword-game-section');
 
-        const COLS = 10; // Columnas del tablero
-        const ROWS = 20; // Filas del tablero
-        const BLOCK_SIZE = 28; // Tamaño de cada bloque en píxeles (REDUCIDO)
+        // Platformer game section removed as requested.
+        const allGameSections = [tetrisGameSection, crosswordGameSection];
 
-        // Ajusta el tamaño del canvas
-        canvas.width = COLS * BLOCK_SIZE;
-        canvas.height = ROWS * BLOCK_SIZE;
+        // --- Navigation Functions ---
+        function showSection(sectionToShow) {
+            allGameSections.forEach(section => {
+                section.style.display = 'none'; // Hide all game sections
+            });
+            gamePortalSection.style.display = 'none'; // Hide the portal section
 
-        // --- Definición de Múltiples Paletas de Colores ---
-        const COLOR_PALETTES = [
-            // Palette 0: Original Intenso
-            [
-                '#FF69B4', // Rosa Fuerte (Hot Pink) - I
-                '#FFD700', // Oro (Gold) - O
-                '#00BFFF', // Azul Cielo Profundo (Deep Sky Blue) - T
-                '#32CD32', // Verde Lima (Lime Green) - S
-                '#FF4500', // Naranja Rojo (Orange Red) - Z
-                '#4169E1', // Azul Real (Royal Blue) - J
-                '#9932CC'  // Púrpura (Dark Orchid) - L
-            ],
-            // Palette 1: Neón / Brillante
-            [
-                '#FF00FF', // Magenta - I
-                '#FFFF00', // Amarillo Puro - O
-                '#00FFFF', // Cian - T
-                '#00FF00', // Verde Brillante - S
-                '#FF0000', // Rojo Brillante - Z
-                '#0000FF', // Azul Brillante - J
-                '#8A2BE2'  // Azul Violeta - L
-            ],
-            // Palette 2: Naturaleza / Tierra
-            [
-                '#9ACD32', // Verde Amarillo - I
-                '#DAA520', // Oro Viejo - O
-                '#6B8E23', // Verde Oliva - T
-                '#5F9EA0', // Azul Cadete - S
-                '#D2691E', // Chocolate - Z
-                '#8B4513', // Marrón Silla - J
-                '#A0522D'  // Sienna - L
-            ],
-            // Palette 3: Oscuro / Galáctico
-            [
-                '#4B0082', // Indigo - I
-                '#1E90FF', // Azul Dodger - O
-                '#BA55D3', // Orquídea Media - T
-                '#20B2AA', // Azul Verde Claro - S
-                '#FF1493', // Rosa Profundo - Z
-                '#7B68EE', // Azul Pizarra Medio - J
-                '#4682B4'  // Acero Azul - L
-            ],
-            // Puedes añadir más paletas aquí para niveles más altos
-            [
-                '#F08080', // Coral Claro
-                '#ADD8E6', // Azul Claro
-                '#90EE90', // Verde Claro
-                '#FFB6C1', // Rosa Claro
-                '#DDA0DD', // Ciruela
-                '#87CEEB', // Azul Cielo Claro
-                '#FFDAB9'  // Melocotón
-            ]
-        ];
+            // Display the selected section as flex for proper layout
+            sectionToShow.style.display = 'flex';
+        }
 
-        // Se inicializa la paleta de colores actual
-        let COLORS = COLOR_PALETTES[0];
+        function showGamePortal() {
+            allGameSections.forEach(section => {
+                section.style.display = 'none'; // Hide all game sections
+            });
+            gamePortalSection.style.display = 'flex'; // Show the portal section
+        }
 
-        // --- Variables del Juego ---
-        let board = []; // El tablero de juego
-        let currentPiece; // La pieza actual en juego
-        let nextPiece; // La siguiente pieza
-        let score = 0; // Puntuación del jugador
-        let gameOver = false; // Estado del juego
-        let gameLoopId; // ID para el loop del juego (para clearInterval)
-        let lastUpdateTime = 0; // Para controlar el tiempo de caída de la pieza
-
-        let level = 1; // Nivel actual del juego
-        let linesClearedTotal = 0; // Total de líneas limpiadas en el juego (se mantiene para estadísticas, pero el score define el nivel)
-        const BASE_FALL_INTERVAL = 600; // Intervalo de caída base en ms (un poco más lento para empezar)
-        let currentFallInterval = BASE_FALL_INTERVAL; // Intervalo de caída actual
-        let nextLevelScoreThreshold = 500; // Puntos necesarios para el siguiente nivel (Nivel 1 a 2)
-        let isPaused = false; // Variable para controlar el estado de pausa
-        let gameStarted = false; // Variable para controlar si el juego ha iniciado
-
-        const scoreDisplay = document.getElementById('score');
-        const levelDisplay = document.getElementById('level');
-        const gameMessage = document.getElementById('game-message');
-        const nextPieceDisplay = document.getElementById('next-piece-display');
-        const comboMessageElement = document.getElementById('combo-message');
-        const levelUpMessageElement = document.getElementById('level-up-message'); // Nuevo elemento para mensajes de nivel
-        const startButton = document.getElementById('startButton'); // Referencia al nuevo botón de inicio
-        const pauseButton = document.getElementById('pauseButton');
-
-        // --- Definición de Piezas (Tetrominoes) ---
-        // Cada pieza es un array de matrices, representando sus rotaciones.
-        // Los números indican el color/tipo de la pieza (índice en COLORS).
-        const TETROMINO_SHAPES = {
-            'I': { shape: [[1, 1, 1, 1]], colorIndex: 0 },
-            'O': { shape: [[1, 1], [1, 1]], colorIndex: 1 },
-            'T': { shape: [[0, 1, 0], [1, 1, 1]], colorIndex: 2 },
-            'S': { shape: [[0, 1, 1], [1, 1, 0]], colorIndex: 3 },
-            'Z': { shape: [[1, 1, 0], [0, 1, 1]], colorIndex: 4 },
-            'J': { shape: [[1, 0, 0], [1, 1, 1]], colorIndex: 5 },
-            'L': { shape: [[0, 0, 1], [1, 1, 1]], colorIndex: 6 }
-        };
-
-        // Class para representar una pieza de Tetris
-        class Piece {
-            constructor(shapeType) {
-                const { shape, colorIndex } = TETROMINO_SHAPES[shapeType];
-                this.shape = shape;
-                this.color = COLORS[colorIndex]; // Ahora COLORS es dinámico
-                this.x = Math.floor(COLS / 2) - Math.floor(shape[0].length / 2); // Posición inicial X
-                this.y = 0; // Posición inicial Y
-                this.shapeType = shapeType; // Guarda el tipo de forma (para mostrar la siguiente)
-            }
-
-            // Dibuja la pieza en el canvas
-            draw() {
-                this.shape.forEach((row, r) => {
-                    row.forEach((value, c) => {
-                        if (value > 0) {
-                            ctx.fillStyle = this.color;
-                            ctx.fillRect(this.x * BLOCK_SIZE + c * BLOCK_SIZE, this.y * BLOCK_SIZE + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                            ctx.strokeStyle = '#fff'; // Borde blanco suave para los bloques
-                            ctx.lineWidth = 1;
-                            ctx.strokeRect(this.x * BLOCK_SIZE + c * BLOCK_SIZE, this.y * BLOCK_SIZE + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                        }
-                    });
-                });
-            }
-
-            // Mueve la pieza
-            move(dx, dy) {
-                if (!this.collision(dx, dy, this.shape)) {
-                    this.x += dx;
-                    this.y += dy;
-                    return true;
+        // --- Event Listeners for Game Cards (Portal) ---
+        document.querySelectorAll('.game-card .play-button').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const gameId = event.target.closest('.game-card').dataset.gameId;
+                if (gameId === 'tetris') {
+                    showSection(tetrisGameSection);
+                    // If Tetris is already initialized and game is over or not started, restart it.
+                    if (window.tetrisGame && (window.tetrisGame.gameOver() || !window.tetrisGame.gameStarted())) {
+                        window.tetrisGame.startGame();
+                    } else if (window.tetrisGame && window.tetrisGame.isPaused()) {
+                         // If paused, just show the paused game screen.
+                    } else if (!window.tetrisGame) {
+                        // If Tetris is loaded for the first time
+                        document.getElementById('game-message').textContent = 'Pulsa "Iniciar Juego" para jugar';
+                        document.getElementById('game-message').classList.remove('hidden');
+                        document.getElementById('tetris-start-button').classList.remove('hidden');
+                        document.getElementById('tetris-pause-button').classList.add('hidden');
+                    }
+                } else if (gameId === 'crossword') {
+                    showSection(crosswordGameSection);
+                    window.crosswordGame.initGame('easy'); // Default to easy when opening crossword
                 }
-                return false;
+            });
+        });
+
+        // --- Buttons to Return to Portal ---
+        document.getElementById('back-to-portal-tetris').addEventListener('click', () => {
+            if (window.tetrisGame && !window.tetrisGame.gameOver()) {
+                // Pause Tetris if returning to portal and game is active
+                if (!window.tetrisGame.isPaused()) {
+                    window.tetrisGame.togglePause();
+                }
+            }
+            showGamePortal();
+        });
+        document.getElementById('back-to-portal-crossword').addEventListener('click', showGamePortal);
+
+
+        // --- TETRIS GAME LOGIC (Encapsulated) ---
+        window.tetrisGame = (() => {
+            const canvas = document.getElementById('tetrisCanvas');
+            const ctx = canvas.getContext('2d');
+
+            const COLS = 10;
+            const ROWS = 20;
+            const BLOCK_SIZE = 28; // Reduced block size
+
+            canvas.width = COLS * BLOCK_SIZE;
+            canvas.height = ROWS * BLOCK_SIZE;
+
+            const COLOR_PALETTES = [
+                [ '#FF69B4', '#FFD700', '#00BFFF', '#32CD32', '#FF4500', '#4169E1', '#9932CC' ],
+                [ '#FF00FF', '#FFFF00', '#00FFFF', '#00FF00', '#FF0000', '#0000FF', '#8A2BE2' ],
+                [ '#9ACD32', '#DAA520', '#6B8E23', '#5F9EA0', '#D2691E', '#8B4513', '#A0522D' ],
+                [ '#4B0082', '#1E90FF', '#BA55D3', '#20B2AA', '#FF1493', '#7B68EE', '#4682B4' ],
+                [ '#F08080', '#ADD8E6', '#90EE90', '#FFB6C1', '#DDA0DD', '#87CEEB', '#FFDAB9' ]
+            ];
+            let COLORS = COLOR_PALETTES[0]; 
+
+            let board = [];
+            let currentPiece;
+            let nextPiece;
+            let score = 0;
+            let gameOver = false;
+            let gameLoopId;
+            let lastUpdateTime = 0;
+
+            let level = 1;
+            let linesClearedTotal = 0;
+            const BASE_FALL_INTERVAL = 600;
+            let currentFallInterval = BASE_FALL_INTERVAL;
+            let nextLevelScoreThreshold = 500;
+            let isPaused = false;
+            let gameStarted = false;
+
+            const scoreDisplay = document.getElementById('score');
+            const levelDisplay = document.getElementById('level');
+            const gameMessage = document.getElementById('game-message');
+            const nextPieceDisplay = document.getElementById('next-piece-display');
+            const comboMessageElement = document.getElementById('combo-message');
+            const levelUpMessageElement = document.getElementById('level-up-message');
+            const startButton = document.getElementById('tetris-start-button');
+            const pauseButton = document.getElementById('tetris-pause-button');
+
+            const TETROMINO_SHAPES = {
+                'I': { shape: [[1, 1, 1, 1]], colorIndex: 0 }, 'O': { shape: [[1, 1], [1, 1]], colorIndex: 1 },
+                'T': { shape: [[0, 1, 0], [1, 1, 1]], colorIndex: 2 }, 'S': { shape: [[0, 1, 1], [1, 1, 0]], colorIndex: 3 },
+                'Z': { shape: [[1, 1, 0], [0, 1, 1]], colorIndex: 4 }, 'J': { shape: [[1, 0, 0], [1, 1, 1]], colorIndex: 5 },
+                'L': { shape: [[0, 0, 1], [1, 1, 1]], colorIndex: 6 }
+            };
+
+            class Piece {
+                constructor(shapeType) {
+                    const { shape, colorIndex } = TETROMINO_SHAPES[shapeType];
+                    this.shape = shape; this.color = COLORS[colorIndex];
+                    this.x = Math.floor(COLS / 2) - Math.floor(shape[0].length / 2); this.y = 0;
+                    this.shapeType = shapeType;
+                }
+                draw() {
+                    this.shape.forEach((row, r) => {
+                        row.forEach((value, c) => {
+                            if (value > 0) {
+                                ctx.fillStyle = this.color;
+                                ctx.fillRect(this.x * BLOCK_SIZE + c * BLOCK_SIZE, this.y * BLOCK_SIZE + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                                ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+                                ctx.strokeRect(this.x * BLOCK_SIZE + c * BLOCK_SIZE, this.y * BLOCK_SIZE + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                            }
+                        });
+                    });
+                }
+                move(dx, dy) {
+                    if (!this.collision(dx, dy, this.shape)) { this.x += dx; this.y += dy; return true; }
+                    return false;
+                }
+                rotate() {
+                    const transpose = (matrix) => matrix[0].map((_, i) => matrix.map(row => row[i]));
+                    const reverseRows = (matrix) => matrix.map(row => [...row].reverse());
+                    let rotatedShape = transpose(this.shape);
+                    if (this.shapeType === 'I' || this.shapeType === 'S' || this.shapeType === 'Z') { rotatedShape = reverseRows(rotatedShape); } else { rotatedShape = rotatedShape.reverse(); }
+                    if (!this.collision(0, 0, rotatedShape)) { this.shape = rotatedShape; return true; }
+                    const kicks = [[0, 0], [-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]];
+                    for (let i = 0; i < kicks.length; i++) {
+                        const [dx, dy] = kicks[i];
+                        if (!this.collision(dx, dy, rotatedShape)) { this.x += dx; this.y += dy; this.shape = rotatedShape; return true; }
+                    }
+                    return false;
+                }
+                collision(dx, dy, newShape) {
+                    for (let r = 0; r < newShape.length; r++) {
+                        for (let c = 0; c < newShape[r].length; c++) {
+                            if (newShape[r][c] > 0) {
+                                let newX = this.x + c + dx; let newY = this.y + r + dy;
+                                if (newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && board[newY][newX] !== 'empty')) { return true; }
+                            }
+                        });
+                    });
+                    return false;
+                }
+                lock() {
+                    this.shape.forEach((row, r) => {
+                        row.forEach((value, c) => {
+                            if (value > 0) {
+                                let boardX = this.x + c; let boardY = this.y + r;
+                                if (boardY < 0) {
+                                    gameOver = true; gameMessage.textContent = '¡Game Over!';
+                                    gameMessage.classList.remove('hidden'); startButton.textContent = "Reiniciar Juego";
+                                    startButton.classList.remove('hidden'); pauseButton.classList.add('hidden');
+                                    clearInterval(gameLoopId); return;
+                                }
+                                board[boardY][boardX] = this.color;
+                            }
+                        });
+                    });
+                    this.clearLines(); this.generateNewPiece();
+                }
+                clearLines() {
+                    let linesCleared = 0;
+                    for (let r = ROWS - 1; r >= 0; r--) {
+                        if (board[r].every(cell => cell !== 'empty')) {
+                            linesCleared++; board.splice(r, 1); board.unshift(Array(COLS).fill('empty')); r++;
+                        }
+                    }
+                    if (linesCleared > 0) {
+                        score += linesCleared * 100 * level; scoreDisplay.textContent = score; linesClearedTotal += linesCleared;
+                        if (level < 10 && score >= nextLevelScoreThreshold) {
+                            level++; levelDisplay.textContent = level; nextLevelScoreThreshold += 1000;
+                            currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 75));
+                            isPaused = true; pauseButton.textContent = "Reanudar"; cancelAnimationFrame(gameLoopId);
+                            initBoard(); drawBoard();
+                            COLORS = COLOR_PALETTES[(level -1) % COLOR_PALETTES.length]; // Change color palette
+                            displayLevelUpMessage();
+                        }
+                        if (linesCleared === 2) { displayComboMessage('¡Doble!'); } else if (linesCleared === 3) { displayComboMessage('¡Triple!'); } else if (linesCleared === 4) { displayComboMessage('¡Tetris!'); }
+                    }
+                }
+                generateNewPiece() {
+                    currentPiece = nextPiece; nextPiece = this.randomPiece(); this.drawNextPiece();
+                    if (currentPiece.collision(0, 0, currentPiece.shape)) {
+                        gameOver = true; gameMessage.textContent = '¡Game Over!';
+                        gameMessage.classList.remove('hidden'); startButton.textContent = "Reiniciar Juego";
+                        startButton.classList.remove('hidden'); pauseButton.classList.add('hidden');
+                        clearInterval(gameLoopId);
+                    }
+                }
+                randomPiece() {
+                    const types = Object.keys(TETROMINO_SHAPES);
+                    const randType = types[Math.floor(Math.random() * types.length)];
+                    return new Piece(randType);
+                }
+                drawNextPiece() {
+                    nextPieceDisplay.innerHTML = ''; const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    tempCanvas.width = 4 * BLOCK_SIZE; tempCanvas.height = 4 * BLOCK_SIZE;
+                    tempCanvas.style.display = 'inline-block'; tempCanvas.style.verticalAlign = 'middle';
+                    tempCanvas.style.marginLeft = '10px'; tempCanvas.style.backgroundColor = '#e0f4f8';
+                    tempCanvas.style.borderRadius = '8px'; tempCanvas.style.border = '2px solid #a7d9f7';
+
+                    nextPiece.shape.forEach((row, r) => {
+                        row.forEach((value, c) => {
+                            if (value > 0) {
+                                tempCtx.fillStyle = nextPiece.color;
+                                tempCtx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                                tempCtx.strokeStyle = '#fff'; tempCtx.lineWidth = 1;
+                                tempCtx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                            }
+                        });
+                    });
+                    nextPieceDisplay.appendChild(tempCanvas);
+                }
             }
 
-            // Rota la pieza
-            rotate() {
-                // Función para transponer una matriz (filas a columnas)
-                const transpose = (matrix) => matrix[0].map((_, i) => matrix.map(row => row[i]));
-                // Función para invertir las filas de una matriz (para rotación anti-horaria)
-                const reverseRows = (matrix) => matrix.map(row => [...row].reverse());
+            function initBoard() { for (let r = 0; r < ROWS; r++) { board[r] = Array(COLS).fill('empty'); }}
+            function drawBoard() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        if (board[r][c] !== 'empty') {
+                            ctx.fillStyle = board[r][c];
+                            ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                            ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+                            ctx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                        }
+                    }
+                }
+            }
+            function displayComboMessage(message) {
+                comboMessageElement.textContent = message; comboMessageElement.classList.add('show');
+                setTimeout(() => { comboMessageElement.classList.remove('show'); }, 700);
+            }
+            const levelUpJokes = [
+                "¿Qué le dice un Tetris a otro? ¡Deja de apilarte, que me ahogo!", "¿Por qué el Tetris nunca gana en un debate? ¡Siempre se queda bloqueado!",
+                "Un Tetris entra a un bar... y le dicen: 'Lo siento, aquí no se permiten piezas sueltas'.", "¿Cuál es el colmo de un Tetris? ¡Que se le caigan todas las líneas!",
+                "Mi vida es como un Tetris: si todo encaja, desaparece.", "¿Qué hace un Tetris en el gimnasio? ¡Forma cubos!",
+                "¿Por qué los Tetris son buenos en matemáticas? ¡Porque siempre están calculando ángulos!",
+                "Mi psicólogo me dijo que mi ansiedad se debía a un juego de Tetris mal resuelto en mi pasado.",
+                "¿Qué es un Tetris bailando? ¡Un baile de bloques!", "¡Felicidades! Has superado otro nivel, ahora el juego se pone más... en línea.",
+                "¿Por qué el lápiz se deprimió? Porque estaba muy atilado.", "¿Qué le dice una pared a otra pared? ¡Nos vemos en la esquina!",
+                "¿Qué hace una computadora en la playa? Busca un mouse playero.", "¿Cómo se llama el hermano mayor de un tomate? ¡Tomatón!",
+                "¿Por qué el perro no puede jugar a las cartas? Porque siempre se sienta sobre las barajas."
+            ];
+            function displayLevelUpMessage() {
+                const randomIndex = Math.floor(Math.random() * levelUpJokes.length);
+                levelUpMessageElement.innerHTML = `¡Nivel ${level}! <br>` + levelUpJokes[randomIndex];
+                levelUpMessageElement.classList.add('show');
+            }
 
-                let rotatedShape = transpose(this.shape);
-                // Si es la pieza 'I' o 'S' o 'Z', rota de forma diferente para mantener la forma
-                if (this.shapeType === 'I' || this.shapeType === 'S' || this.shapeType === 'Z') {
-                    rotatedShape = reverseRows(rotatedShape);
+            function gameLoop(currentTime) {
+                gameLoopId = requestAnimationFrame(gameLoop);
+                if (gameOver || isPaused || !gameStarted) return;
+                if (currentTime - lastUpdateTime > currentFallInterval) {
+                    if (!currentPiece.move(0, 1)) { currentPiece.lock(); }
+                    lastUpdateTime = currentTime;
+                }
+                drawBoard(); currentPiece.draw();
+            }
+
+            function startGame() {
+                initBoard(); score = 0; level = 1; linesClearedTotal = 0;
+                currentFallInterval = BASE_FALL_INTERVAL; nextLevelScoreThreshold = 500;
+                isPaused = false; gameOver = false; gameStarted = true;
+
+                scoreDisplay.textContent = score; levelDisplay.textContent = level;
+                gameMessage.classList.add('hidden'); comboMessageElement.classList.remove('show'); levelUpMessageElement.classList.remove('show');
+
+                startButton.classList.add('hidden'); pauseButton.classList.remove('hidden'); pauseButton.textContent = "Pausar";
+                COLORS = COLOR_PALETTES[0]; // Reset palette on new game start
+
+                currentPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
+                nextPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
+                currentPiece.drawNextPiece(); lastUpdateTime = performance.now();
+                if (gameLoopId) { cancelAnimationFrame(gameLoopId); }
+                gameLoopId = requestAnimationFrame(gameLoop);
+            }
+
+            document.addEventListener('keydown', e => {
+                if (!gameStarted) return; if (gameOver) { if (e.key === 'Enter') { startGame(); } return; }
+                if (isPaused && e.key !== 'p' && e.key !== 'P') return;
+                switch (e.key) {
+                    case 'ArrowLeft': currentPiece.move(-1, 0); break; case 'ArrowRight': currentPiece.move(1, 0); break;
+                    case 'ArrowDown': currentPiece.move(0, 1); break; case 'ArrowUp': currentPiece.rotate(); break;
+                    case ' ': while (currentPiece.move(0, 1)); currentPiece.lock(); break;
+                    case 'p': case 'P': togglePause(); break;
+                }
+                if (!isPaused) { drawBoard(); currentPiece.draw(); }
+            });
+
+            let touchStartX = 0; let touchStartY = 0; const tapThreshold = 8; const swipeThreshold = 20; const hardDropSwipeThreshold = 70;
+            canvas.addEventListener('touchstart', e => {
+                e.preventDefault(); if (!gameStarted || gameOver || isPaused) return;
+                touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+            });
+            canvas.addEventListener('touchmove', e => { e.preventDefault(); });
+            canvas.addEventListener('touchend', e => {
+                if (!gameStarted || gameOver || isPaused) return;
+                const touchEndX = e.changedTouches[0].clientX; const touchEndY = e.changedTouches[0].clientY;
+                const deltaX = touchEndX - touchStartX; const deltaY = touchEndY - touchStartY;
+                const isTap = Math.abs(deltaX) < tapThreshold && Math.abs(deltaY) < tapThreshold;
+
+                if (isTap) { currentPiece.rotate(); } else {
+                    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
+                        if (deltaX < 0) { currentPiece.move(-1, 0); } else { currentPiece.move(1, 0); }
+                    } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > swipeThreshold) {
+                        if (deltaY > 0) {
+                            if (Math.abs(deltaY) > hardDropSwipeThreshold) { while (currentPiece.move(0, 1)); currentPiece.lock(); }
+                            else { currentPiece.move(0, 1); }
+                        }
+                    }
+                }
+                drawBoard(); currentPiece.draw();
+            });
+
+            function togglePause() {
+                if (!gameStarted || gameOver) return;
+                isPaused = !isPaused;
+                if (isPaused) {
+                    pauseButton.textContent = "Reanudar"; gameMessage.textContent = '¡Juego Pausado!';
+                    gameMessage.classList.remove('hidden'); cancelAnimationFrame(gameLoopId);
                 } else {
-                    rotatedShape = rotatedShape.reverse(); // Rotación normal para otras piezas
+                    pauseButton.textContent = "Pausar"; gameMessage.classList.add('hidden');
+                    levelUpMessageElement.classList.remove('show'); lastUpdateTime = performance.now();
+                    gameLoop(performance.now());
                 }
+            }
+            pauseButton.addEventListener('click', togglePause);
 
-                if (!this.collision(0, 0, rotatedShape)) {
-                    this.shape = rotatedShape;
-                    return true;
-                }
-                // Si la rotación causa colisión, intenta desplazar la pieza (Wall Kick)
-                const kicks = [
-                    [0, 0], [-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]
-                ]; // Posibles desplazamientos para wall kick
+            startButton.addEventListener('click', () => {
+                if (gameOver || !gameStarted) { startGame(); }
+                else if (isPaused) { togglePause(); }
+            });
 
-                for (let i = 0; i < kicks.length; i++) {
-                    const [dx, dy] = kicks[i];
-                    if (!this.collision(dx, dy, rotatedShape)) {
-                        this.x += dx;
-                        this.y += dy;
-                        this.shape = rotatedShape;
-                        return true;
+            return { startGame: startGame, togglePause: togglePause, isPaused: () => isPaused, gameOver: () => gameOver, gameStarted: () => gameStarted };
+        })();
+
+
+        // --- CRUCIGRAMA GAME LOGIC (Encapsulated) ---
+        window.crosswordGame = (() => {
+            const crosswordGridElement = document.getElementById('crossword-grid');
+            const cluesAcrossElement = document.getElementById('crossword-clues-across');
+            const cluesDownElement = document.getElementById('crossword-clues-down');
+            const crosswordMessageElement = document.getElementById('crossword-message');
+            const checkButton = document.getElementById('crossword-check-button');
+            const resetButton = document.getElementById('crossword-reset-button');
+            const currentClueInfoElement = document.getElementById('crossword-current-clue-info');
+            const difficultyButtons = document.querySelectorAll('.difficulty-buttons .game-button');
+            const crosswordGameArea = document.getElementById('crossword-game-area');
+            const levelCompleteMessageDiv = document.getElementById('level-complete-message');
+            const levelCompleteText = document.getElementById('level-complete-text');
+            const nextCrosswordButton = document.getElementById('next-crossword-button');
+
+            let currentDifficulty = 'easy'; // Default difficulty
+            let currentPuzzleIndex = 0;
+
+            // Define crossword puzzles for each difficulty
+            const crosswordPuzzles = {
+                easy: [
+                    {
+                        name: "Crucigrama Fácil 1",
+                        gridSize: 6,
+                        clues: [
+                            { word: "SOL", clue: "Astro rey.", start: [0, 0], direction: "across" },
+                            { word: "LUNA", clue: "Satélite natural de la Tierra.", start: [0, 0], direction: "down" },
+                            { word: "MAR", clue: "Gran extensión de agua salada.", start: [2, 1], direction: "across" },
+                            { word: "ARBOL", clue: "Planta de tronco leñoso.", start: [0, 2], direction: "down" },
+                            { word: "PAZ", clue: "Estado de tranquilidad o sosiego.", start: [3, 4], direction: "across" }
+                        ],
+                        levelCompleteMessage: "¡Excelente! Has completado el crucigrama fácil. Recuerda: 'El conocimiento es poder'. ¡Sigue adelante!",
+                    },
+                    {
+                        name: "Crucigrama Fácil 2",
+                        gridSize: 6,
+                        clues: [
+                            { word: "ROJO", clue: "Color de la sangre.", start: [0, 0], direction: "across" },
+                            { word: "OSO", clue: "Animal grande y peludo.", start: [0, 0], direction: "down" },
+                            { word: "VIDA", clue: "Existencia de los seres.", start: [2, 1], direction: "across" },
+                            { word: "GATO", clue: "Animal doméstico que maúlla.", start: [0, 3], direction: "down" }
+                        ],
+                        levelCompleteMessage: "¡Muy bien! Has superado otro reto. 'La paciencia es una virtud, especialmente en los crucigramas'.",
                     }
-                }
-                return false;
-            }
-
-            // Comprueba si hay colisión en una posición dada con una forma específica
-            collision(dx, dy, newShape) {
-                for (let r = 0; r < newShape.length; r++) {
-                    for (let c = 0; c < newShape[r].length; c++) {
-                        if (newShape[r][c] > 0) { // Si es un bloque de la pieza
-                            let newX = this.x + c + dx;
-                            let newY = this.y + r + dy;
-
-                            // Comprueba los límites del tablero y las colisiones con bloques existentes
-                            if (newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && board[newY][newX] !== 'empty')) {
-                                return true;
-                            }
-                        }
+                ],
+                medium: [
+                    {
+                        name: "Crucigrama Medio 1",
+                        gridSize: 8,
+                        clues: [
+                            { word: "CULTURA", clue: "Conjunto de conocimientos, ideas, tradiciones y costumbres que caracterizan a un pueblo o clase social.", start: [0, 0], direction: "across" },
+                            { word: "TIEMPO", clue: "Magnitud física que permite ordenar la secuencia de los sucesos.", start: [0, 0], direction: "down" },
+                            { word: "ARTE", clue: "Actividad en la que el ser humano recrea, con fines estéticos, un aspecto de la realidad o un sentimiento.", start: [2, 2], direction: "across" },
+                            { word: "HISTORIA", clue: "Ciencia que estudia el pasado.", start: [0, 6], direction: "down" },
+                            { word: "LIBRO", clue: "Conjunto de hojas de papel, pergamino, vitela, etc.", start: [4, 4], direction: "across" },
+                            { word: "PAZ", clue: "Estado de tranquilidad o sosiego.", start: [1, 5], direction: "down" },
+                            { word: "CIENCIA", clue: "Rama del saber humano constituida por el conjunto de conocimientos objetivos y verificables sobre una materia determinada.", start: [6, 0], direction: "across" },
+                            { word: "MUSICA", clue: "Arte de combinar los sonidos.", start: [3, 0], direction: "down" }
+                        ],
+                        levelCompleteMessage: "¡Impresionante! Has dominado el nivel medio. 'La vida es como una bicicleta: para mantener el equilibrio, tienes que seguir avanzando.'",
                     }
-                }
-                return false;
-            }
-
-            // Bloquea la pieza en el tablero
-            lock() {
-                this.shape.forEach((row, r) => {
-                    row.forEach((value, c) => {
-                        if (value > 0) {
-                            let boardX = this.x + c;
-                            let boardY = this.y + r;
-                            if (boardY < 0) { // Si la pieza está por encima del tablero (game over)
-                                gameOver = true;
-                                gameMessage.textContent = '¡Game Over!';
-                                gameMessage.classList.remove('hidden'); // Asegura que el mensaje de Game Over sea visible
-                                startButton.textContent = "Reiniciar Juego"; // Cambia el texto del botón
-                                startButton.classList.remove('hidden'); // Asegura que el botón sea visible
-                                pauseButton.classList.add('hidden'); // Oculta el botón de pausa
-                                clearInterval(gameLoopId); // Detiene el bucle del juego
-                                return;
-                            }
-                            board[boardY][boardX] = this.color; // Asigna el color al tablero
-                        }
-                    });
-                });
-                this.clearLines(); // Comprueba y limpia líneas
-                this.generateNewPiece(); // Genera una nueva pieza
-            }
-            // Elimina líneas completas del tablero
-            clearLines() {
-                let linesCleared = 0;
-                for (let r = ROWS - 1; r >= 0; r--) {
-                    if (board[r].every(cell => cell !== 'empty')) { // Si la fila está completa
-                        linesCleared++;
-                        // Elimina la fila y añade una nueva fila vacía al principio
-                        board.splice(r, 1);
-                        board.unshift(Array(COLS).fill('empty'));
-                        r++; // Vuelve a verificar la misma fila (ahora con los bloques de arriba)
+                ],
+                hard: [
+                    {
+                        name: "Crucigrama Difícil 1",
+                        gridSize: 10,
+                        clues: [
+                            { word: "FILOSOFIA", clue: "Estudio de una variedad de problemas fundamentales acerca de cuestiones como la existencia, el conocimiento, la verdad, la moral, la belleza, la mente y el lenguaje.", start: [0, 0], direction: "across" },
+                            { word: "UNIVERSO", clue: "Conjunto de todo lo que existe, la materia, la energía, el espacio y el tiempo.", start: [0, 0], direction: "down" },
+                            { word: "GENETICA", clue: "Rama de la biología que estudia la herencia.", start: [2, 5], direction: "across" },
+                            { word: "CUANTICA", clue: "Teoría física basada en la utilización del concepto de unidad cuántica para describir las propiedades dinámicas de las partículas subatómicas y las interacciones de la radiación y la materia.", start: [0, 9], direction: "down" },
+                            { word: "NEUROCIENCIA", clue: "Estudio científico del sistema nervioso.", start: [5, 2], direction: "across" },
+                            { word: "SIMBIOSIS", clue: "Asociación íntima de organismos de especies diferentes para beneficiarse mutuamente en su desarrollo vital.", start: [1, 7], direction: "down" },
+                            { word: "CRIPTO", clue: "Prefijo que significa 'oculto' o 'secreto'.", start: [8, 0], direction: "across" },
+                            { word: "ALGORITMO", clue: "Conjunto ordenado y finito de operaciones que permite hallar la solución de un problema.", start: [4, 0], direction: "down" }
+                        ],
+                        levelCompleteMessage: "¡Increíble! Has conquistado el crucigrama más difícil. 'Cada desafío superado es una lección aprendida. No dejes de aprender.'",
                     }
-                }
-                if (linesCleared > 0) {
-                    score += linesCleared * 100 * level; // Aumenta la puntuación, influenciada por el nivel
-                    scoreDisplay.textContent = score;
+                ]
+            };
 
-                    linesClearedTotal += linesCleared; // Actualiza el total de líneas limpiadas
 
-                    // Verifica si se sube de nivel basado en la puntuación
-                    if (level < 10 && score >= nextLevelScoreThreshold) { // Máximo 10 niveles
-                        level++;
-                        levelDisplay.textContent = level;
-                        // Recalcula el umbral de puntos para el siguiente nivel
-                        // Nivel 1 a 2: 500, Nivel 2 a 3: 500 + 1000 = 1500, Nivel 3 a 4: 1500 + 1000 = 2500
-                        nextLevelScoreThreshold += 1000; // Incrementa el umbral en 1000 para el siguiente nivel
+            function assignClueNumbersAndPrepareGridData(cluesForPuzzle, currentGridSize) {
+                const startCellMap = {}; // Key: "r-c", Value: { acrossClue: data, downClue: data, number: assignedNum }
+                let clueNumberCounter = 1;
 
-                        // Reduce el intervalo de caída para aumentar la velocidad (dificultad)
-                        currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 75)); // Aumenta la velocidad más rápido
-
-                        // Pausar el juego, limpiar el tablero y mostrar el chiste
-                        isPaused = true;
-                        pauseButton.textContent = "Reanudar"; // Actualiza el texto del botón de pausa
-                        cancelAnimationFrame(gameLoopId); // Detiene el bucle del juego
-
-                        initBoard(); // Limpia el tablero al pasar de nivel
-                        drawBoard(); // Dibuja el tablero vacío después de limpiar
-                        COLORS = COLOR_PALETTES[(level -1) % COLOR_PALETTES.length]; // Cambia la paleta de colores
-                        
-                        displayLevelUpMessage(); // Muestra el mensaje de nivel (chiste)
+                // First, assign unique numbers to starting cells
+                cluesForPuzzle.forEach(data => {
+                    const key = `${data.start[0]}-${data.start[1]}`;
+                    if (!startCellMap[key]) {
+                        startCellMap[key] = { acrossClue: null, downClue: null, number: null };
                     }
-
-                    // Efectos especiales para combos
-                    if (linesCleared === 2) {
-                        displayComboMessage('¡Doble!');
-                    } else if (linesCleared === 3) {
-                        displayComboMessage('¡Triple!');
-                    } else if (linesCleared === 4) {
-                        displayComboMessage('¡Tetris!');
-                    }
-                }
-            }
-
-            // Genera una nueva pieza para el juego
-            generateNewPiece() {
-                currentPiece = nextPiece;
-                nextPiece = this.randomPiece();
-                this.drawNextPiece();
-                if (currentPiece.collision(0, 0, currentPiece.shape)) { // Si la nueva pieza colisiona al inicio
-                    gameOver = true;
-                    gameMessage.textContent = '¡Game Over!';
-                    gameMessage.classList.remove('hidden'); // Asegura que el mensaje de Game Over sea visible
-                    startButton.textContent = "Reiniciar Juego"; // Cambia el texto del botón
-                    startButton.classList.remove('hidden'); // Asegura que el botón sea visible
-                    pauseButton.classList.add('hidden'); // Oculta el botón de pausa
-                    clearInterval(gameLoopId);
-                }
-            }
-
-            // Devuelve una pieza aleatoria
-            randomPiece() {
-                const types = Object.keys(TETROMINO_SHAPES);
-                const randType = types[Math.floor(Math.random() * types.length)];
-                return new Piece(randType);
-            }
-
-            // Dibuja la siguiente pieza en el área de "Siguiente"
-            drawNextPiece() {
-                nextPieceDisplay.innerHTML = ''; // Limpia el contenido anterior
-
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                tempCanvas.width = 4 * BLOCK_SIZE; // Tamaño máximo para una pieza 4x4
-                tempCanvas.height = 4 * BLOCK_SIZE;
-                tempCanvas.style.display = 'inline-block';
-                tempCanvas.style.verticalAlign = 'middle';
-                tempCanvas.style.marginLeft = '10px';
-                tempCanvas.style.backgroundColor = '#e0f4f8';
-                tempCanvas.style.borderRadius = '8px';
-                tempCanvas.style.border = '2px solid #a7d9f7';
-
-                nextPiece.shape.forEach((row, r) => {
-                    row.forEach((value, c) => {
-                        if (value > 0) {
-                            tempCtx.fillStyle = nextPiece.color;
-                            tempCtx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                            tempCtx.strokeStyle = '#fff';
-                            tempCtx.lineWidth = 1;
-                            tempCtx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                        }
-                    });
-                });
-                nextPieceDisplay.appendChild(tempCanvas);
-            }
-        }
-
-        // --- Funciones de Juego ---
-        function initBoard() {
-            for (let r = 0; r < ROWS; r++) {
-                board[r] = Array(COLS).fill('empty'); // Inicializa todas las celdas como vacías
-            }
-        }
-
-        // Dibuja todo el tablero, incluyendo las piezas bloqueadas
-        function drawBoard() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpia todo el canvas
-            for (let r = 0; r < ROWS; r++) {
-                for (let c = 0; c < COLS; c++) {
-                    if (board[r][c] !== 'empty') {
-                        ctx.fillStyle = board[r][c]; // Usa el color almacenado
-                        ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                        ctx.strokeStyle = '#fff';
-                        ctx.lineWidth = 1;
-                        ctx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                    }
-                }
-            }
-        }
-
-        // Muestra un mensaje de combo en la pantalla
-        function displayComboMessage(message) {
-            comboMessageElement.textContent = message;
-            comboMessageElement.classList.add('show');
-            setTimeout(() => {
-                comboMessageElement.classList.remove('show');
-            }, 700); // El mensaje desaparece después de 0.7 segundos
-        }
-
-        // Chistes para subir de nivel (NUEVOS CHISTES AÑADIDOS AQUÍ)
-        const levelUpJokes = [
-            "¿Qué le dice un Tetris a otro? ¡Deja de apilarte, que me ahogo!",
-            "¿Por qué el Tetris nunca gana en un debate? ¡Siempre se queda bloqueado!",
-            "Un Tetris entra a un bar... y le dicen: 'Lo siento, aquí no se permiten piezas sueltas'.",
-            "¿Cuál es el colmo de un Tetris? ¡Que se le caigan todas las líneas!",
-            "Mi vida es como un Tetris: si todo encaja, desaparece.",
-            "¿Qué hace un Tetris en el gimnasio? ¡Forma cubos!",
-            "¿Por qué los Tetris son buenos en matemáticas? ¡Porque siempre están calculando ángulos!",
-            "Mi psicólogo me dijo que mi ansiedad se debía a un juego de Tetris mal resuelto en mi pasado.",
-            "¿Qué es un Tetris bailando? ¡Un baile de bloques!",
-            "¡Felicidades! Has superado otro nivel, ahora el juego se pone más... en línea.",
-            "¿Por qué el lápiz se deprimió? Porque estaba muy atilado.",
-            "¿Qué le dice una pared a otra pared? ¡Nos vemos en la esquina!",
-            "¿Qué hace una computadora en la playa? Busca un mouse playero.",
-            "¿Cómo se llama el hermano mayor de un tomate? ¡Tomatón!",
-            "¿Por qué el perro no puede jugar a las cartas? Porque siempre se sienta sobre las barajas."
-        ];
-
-        // Muestra un chiste de nivel en la pantalla
-        function displayLevelUpMessage() {
-            const randomIndex = Math.floor(Math.random() * levelUpJokes.length);
-            levelUpMessageElement.innerHTML = `¡Nivel ${level}! <br>` + levelUpJokes[randomIndex]; // Añade salto de línea para chiste
-            levelUpMessageElement.classList.add('show');
-            // El chiste se quedará en pantalla hasta que se reanude el juego con el botón
-            // No hay setTimeout para ocultarlo automáticamente en este caso
-        }
-
-        // Bucle principal del juego
-        function gameLoop(currentTime) {
-            gameLoopId = requestAnimationFrame(gameLoop); // Solicita el siguiente frame
-
-            if (gameOver || isPaused || !gameStarted) return; // Si está pausado, game over, o no ha iniciado, no actualiza
-
-            if (currentTime - lastUpdateTime > currentFallInterval) { // Usa el intervalo de caída actual
-                // La pieza cae si no colisiona
-                if (!currentPiece.move(0, 1)) {
-                    currentPiece.lock(); // Si colisiona, se bloquea
-                }
-                lastUpdateTime = currentTime;
-            }
-
-            drawBoard(); // Dibuja el tablero
-            currentPiece.draw(); // Dibuja la pieza actual
-        }
-
-        // Inicia el juego
-        function startGame() {
-            initBoard();
-            score = 0;
-            level = 1;
-            linesClearedTotal = 0;
-            currentFallInterval = BASE_FALL_INTERVAL;
-            nextLevelScoreThreshold = 500; // Reinicia el umbral para el Nivel 1 -> 2
-            isPaused = false;
-            gameOver = false;
-            gameStarted = true; // El juego ha iniciado
-
-            scoreDisplay.textContent = score;
-            levelDisplay.textContent = level;
-            gameMessage.classList.add('hidden'); // Oculta el mensaje de inicio/game over
-            comboMessageElement.classList.remove('show'); // Esconde mensajes de combo
-            levelUpMessageElement.classList.remove('show'); // Esconde mensajes de nivel
-
-            // Oculta el botón de inicio y muestra el de pausa
-            startButton.classList.add('hidden');
-            pauseButton.classList.remove('hidden');
-            pauseButton.textContent = "Pausar"; // Restablece el texto del botón
-
-            // Asigna la paleta de colores inicial para el nivel 1
-            COLORS = COLOR_PALETTES[0];
-
-            currentPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
-            nextPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
-            currentPiece.drawNextPiece();
-            lastUpdateTime = performance.now();
-            if (gameLoopId) {
-                cancelAnimationFrame(gameLoopId);
-            }
-            gameLoopId = requestAnimationFrame(gameLoop);
-        }
-
-        // --- Controles de Teclado ---
-        document.addEventListener('keydown', e => {
-            if (!gameStarted) return; // No procesar teclas si el juego no ha iniciado
-
-            if (gameOver) {
-                if (e.key === 'Enter') {
-                    startGame(); // Reinicia el juego con Enter
-                }
-                return;
-            }
-
-            if (isPaused && e.key !== 'p' && e.key !== 'P') return;
-
-            switch (e.key) {
-                case 'ArrowLeft':
-                    currentPiece.move(-1, 0);
-                    break;
-                case 'ArrowRight':
-                    currentPiece.move(1, 0);
-                    break;
-                case 'ArrowDown':
-                    currentPiece.move(0, 1);
-                    break;
-                case 'ArrowUp':
-                    currentPiece.rotate();
-                    break;
-                case ' ': // Espacio para soltar la pieza
-                    while (currentPiece.move(0, 1));
-                    currentPiece.lock();
-                    break;
-                case 'p':
-                case 'P':
-                    togglePause();
-                    break;
-            }
-            if (!isPaused) {
-                drawBoard();
-                currentPiece.draw();
-            }
-        });
-
-        // --- Controles Táctiles en el Canvas ---
-        let touchStartX = 0;
-        let touchStartY = 0;
-        const tapThreshold = 8; // Reducido para mayor sensibilidad al toque
-        const swipeThreshold = 20; // Reducido para mayor sensibilidad al deslizamiento
-        const hardDropSwipeThreshold = 70; // Reducido para hacer el hard drop más fácil de activar
-
-        canvas.addEventListener('touchstart', e => {
-            e.preventDefault();
-            if (!gameStarted) { // Si el juego no ha iniciado, un toque en el canvas no hace nada (se usa el botón de inicio)
-                return;
-            }
-            if (gameOver) { // Si el juego ha terminado, presionar el canvas (que no sea el botón) no hace nada
-                return;
-            }
-            if (isPaused) return;
-
-            touchStartX = e.touches[0].clientX;
-            touchStartY = e.touches[0].clientY;
-        });
-
-        canvas.addEventListener('touchmove', e => {
-            e.preventDefault();
-        });
-
-        canvas.addEventListener('touchend', e => {
-            if (!gameStarted || gameOver || isPaused) return;
-
-            const touchEndX = e.changedTouches[0].clientX;
-            const touchEndY = e.changedTouches[0].clientY;
-
-            const deltaX = touchEndX - touchStartX;
-            const deltaY = touchEndY - touchStartY;
-
-            const isTap = Math.abs(deltaX) < tapThreshold && Math.abs(deltaY) < tapThreshold;
-
-            if (isTap) {
-                currentPiece.rotate();
-            } else {
-                if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
-                    if (deltaX < 0) {
-                        currentPiece.move(-1, 0);
+                    if (data.direction === "across") {
+                        startCellMap[key].acrossClue = data;
                     } else {
-                        currentPiece.move(1, 0);
+                        startCellMap[key].downClue = data;
                     }
-                } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > swipeThreshold) {
-                    if (deltaY > 0) {
-                        if (Math.abs(deltaY) > hardDropSwipeThreshold) {
-                            while (currentPiece.move(0, 1));
-                            currentPiece.lock();
+                });
+
+                // Sort unique starting cells to assign numbers logically (top-left first)
+                const sortedKeys = Object.keys(startCellMap).sort((a, b) => {
+                    const [r1, c1] = a.split('-').map(Number);
+                    const [r2, c2] = b.split('-').map(Number);
+                    if (r1 !== r2) return r1 - r2;
+                    return c1 - c2;
+                });
+
+                sortedKeys.forEach(key => {
+                    const cellInfo = startCellMap[key];
+                    cellInfo.number = clueNumberCounter++; // Assign a number to the cell
+                    // Assign this number back to the original crosswordData objects
+                    if (cellInfo.acrossClue) {
+                        cellInfo.acrossClue.assignedClueNumber = cellInfo.number;
+                    }
+                    if (cellInfo.downClue) {
+                        cellInfo.downClue.assignedClueNumber = cellInfo.number;
+                    }
+                });
+
+                // Now, initialize grid with empty cells and no clue numbers initially
+                grid = Array(currentGridSize).fill(null).map(() => Array(currentGridSize).fill({ char: '', input: '', isBlack: false, clueNumber: null }));
+
+                // Place words on the grid and record the clue number for the starting cell
+                cluesForPuzzle.forEach(data => {
+                    let r = data.start[0];
+                    let c = data.start[1];
+                    let wordChars = data.word.split('');
+
+                    for (let i = 0; i < wordChars.length; i++) {
+                        let currentRow = r;
+                        let currentCol = c;
+                        if (data.direction === "across") {
+                            currentCol += i;
                         } else {
-                            currentPiece.move(0, 1);
+                            currentRow += i;
+                        }
+
+                        if (currentRow >= 0 && currentRow < currentGridSize && currentCol >= 0 && currentCol < currentGridSize) {
+                            // Ensure the object in the grid is mutable and not a shared reference to the initial empty state
+                            if (grid[currentRow][currentCol].isBlack === undefined || grid[currentRow][currentCol].isBlack === true) {
+                                grid[currentRow][currentCol] = { char: '', input: '', isBlack: false, clueNumber: null };
+                            }
+                            grid[currentRow][currentCol].char = wordChars[i];
+                            grid[currentRow][currentCol].input = ''; // Reset input on grid creation
+
+                            // Assign the assignedClueNumber to the grid cell if it's the start of a word
+                            if (i === 0) {
+                                grid[currentRow][currentCol].clueNumber = data.assignedClueNumber;
+                            }
+                        }
+                    }
+                });
+
+                // Fill in black squares where no word is present
+                for (let r = 0; r < currentGridSize; r++) {
+                    for (let c = 0; c < currentGridSize; c++) {
+                        if (grid[r][c].char === '') {
+                            grid[r][c].isBlack = true;
                         }
                     }
                 }
             }
-            drawBoard();
-            currentPiece.draw();
-        });
 
-        // --- Funciones de Pausa ---
-        function togglePause() {
-            if (!gameStarted || gameOver) return; // No permitir pausa si el juego no ha iniciado o ya terminó
+            function renderCrossword() {
+                crosswordGridElement.innerHTML = '';
+                crosswordGridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+                crosswordGridElement.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
 
-            isPaused = !isPaused;
-            if (isPaused) {
-                pauseButton.textContent = "Reanudar";
-                gameMessage.textContent = '¡Juego Pausado!';
-                gameMessage.classList.remove('hidden'); // Muestra el mensaje de "Juego Pausado!"
-                cancelAnimationFrame(gameLoopId); // Detener el bucle de animación cuando está pausado
-            } else {
-                pauseButton.textContent = "Pausar";
-                gameMessage.classList.add('hidden'); // Oculta el mensaje de "Juego Pausado!"
-                levelUpMessageElement.classList.remove('show'); // Oculta el chiste al reanudar
-                lastUpdateTime = performance.now();
-                gameLoop(performance.now()); // Reanudar el bucle de animación
+                grid.forEach((row, r) => {
+                    row.forEach((cell, c) => {
+                        const cellDiv = document.createElement('div');
+                        cellDiv.classList.add('crossword-cell');
+                        if (cell.isBlack) {
+                            cellDiv.classList.add('black');
+                        } else {
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.maxLength = 1;
+                            input.dataset.row = r;
+                            input.dataset.col = c;
+                            input.value = cell.input;
+                            input.addEventListener('input', (e) => {
+                                cell.input = e.target.value.toUpperCase();
+                                if (e.target.value.length === 1) {
+                                    const nextCell = getNextCell(r, c);
+                                    if (nextCell) {
+                                        const nextInput = crosswordGridElement.querySelector(`input[data-row="${nextCell.r}"][data-col="${nextCell.c}"]`);
+                                        if (nextInput) {
+                                            nextInput.focus();
+                                            nextInput.select(); // Select text for easier overwriting
+                                        }
+                                    }
+                                }
+                            });
+                            input.addEventListener('focus', (e) => {
+                                document.querySelectorAll('.crossword-cell.active').forEach(el => el.classList.remove('active'));
+                                e.target.closest('.crossword-cell').classList.add('active');
+                                updateClueInfo(r, c);
+                            });
+                            input.addEventListener('blur', (e) => {
+                                e.target.closest('.crossword-cell').classList.remove('active');
+                                currentClueInfoElement.textContent = ''; // Clear clue info on blur
+                            });
+
+                            cellDiv.appendChild(input);
+                            if (cell.clueNumber !== null) {
+                                const clueNumSpan = document.createElement('span');
+                                clueNumSpan.classList.add('clue-number');
+                                clueNumSpan.textContent = cell.clueNumber;
+                                cellDiv.appendChild(clueNumSpan);
+                            }
+                        }
+                        crosswordGridElement.appendChild(cellDiv);
+                    });
+                });
+
+                renderClues();
             }
-        }
-        // Event Listener para el botón de pausa
-        pauseButton.addEventListener('click', togglePause);
 
-        // --- Funciones de Inicio de Juego ---
-        startButton.addEventListener('click', () => {
-            if (gameOver) {
-                // Si el juego terminó, reiniciar
-                startGame();
-            } else if (!gameStarted) {
-                // Si el juego aún no ha iniciado, iniciar por primera vez
-                startGame();
-            } else if (isPaused) {
-                // Si el juego está pausado, reanudar
-                togglePause();
+            function getNextCell(r, c) {
+                // Try to move right first
+                for (let col = c + 1; col < gridSize; col++) {
+                    if (!grid[r][col].isBlack) {
+                        return { r: r, c: col };
+                    }
+                }
+                // If no more cells to the right, move to the next row from column 0
+                for (let row = r + 1; row < gridSize; row++) {
+                    for (let col = 0; col < gridSize; col++) {
+                        if (!grid[row][col].isBlack) {
+                            return { r: row, c: col };
+                        }
+                    }
+                }
+                return null; // No more cells
             }
-        });
 
-        // --- Inicialización al cargar la ventana ---
+
+            function renderClues() {
+                cluesAcrossElement.innerHTML = '';
+                cluesDownElement.innerHTML = '';
+
+                // Filter and sort clues by assigned clue number
+                const currentPuzzlesClues = crosswordPuzzles[currentDifficulty][currentPuzzleIndex].clues;
+                const acrossClues = currentPuzzlesClues.filter(data => data.direction === "across").sort((a, b) => a.assignedClueNumber - b.assignedClueNumber);
+                const downClues = currentPuzzlesClues.filter(data => data.direction === "down").sort((a, b) => a.assignedClueNumber - b.assignedClueNumber);
+
+                acrossClues.forEach(data => {
+                    const listItem = document.createElement('li');
+                    listItem.dataset.clueNumber = data.assignedClueNumber;
+                    listItem.textContent = `${data.assignedClueNumber}. ${data.clue}`;
+                    cluesAcrossElement.appendChild(listItem);
+                });
+
+                downClues.forEach(data => {
+                    const listItem = document.createElement('li');
+                    listItem.dataset.clueNumber = data.assignedClueNumber;
+                    listItem.textContent = `${data.assignedClueNumber}. ${data.clue}`;
+                    cluesDownElement.appendChild(listItem);
+                });
+            }
+
+            function updateClueInfo(r, c) {
+                currentClueInfoElement.innerHTML = '';
+                const activeCell = grid[r][c];
+                const currentPuzzlesClues = crosswordPuzzles[currentDifficulty][currentPuzzleIndex].clues;
+
+                if (activeCell && !activeCell.isBlack) {
+                    const relevantClues = currentPuzzlesClues.filter(data => {
+                        const wordLength = data.word.length;
+                        const [startR, startC] = data.start;
+
+                        if (data.direction === 'across') {
+                            return r === startR && c >= startC && c < startC + wordLength;
+                        } else { // 'down'
+                            return c === startC && r >= startR && r < startR + wordLength;
+                        }
+                    }).sort((a, b) => a.assignedClueNumber - b.assignedClueNumber);
+
+                    if (relevantClues.length > 0) {
+                        relevantClues.forEach(clueData => {
+                            const clueText = document.createElement('span');
+                            clueText.textContent = `${clueData.assignedClueNumber}. ${clueData.clue} (${clueData.direction === 'across' ? 'Horizontal' : 'Vertical'})`;
+                            currentClueInfoElement.appendChild(clueText);
+                            currentClueInfoElement.appendChild(document.createElement('br'));
+                        });
+                    }
+                }
+            }
+
+            function checkCrossword() {
+                let allCorrect = true;
+                crosswordMessageElement.textContent = '';
+                crosswordMessageElement.style.color = '';
+
+                for (let r = 0; r < gridSize; r++) {
+                    for (let c = 0; c < gridSize; c++) {
+                        const cell = grid[r][c];
+                        const inputElement = crosswordGridElement.querySelector(`input[data-row="${r}"][data-col="${c}"]`);
+                        if (!cell.isBlack) {
+                            if (cell.input.toUpperCase() !== cell.char.toUpperCase()) {
+                                allCorrect = false;
+                                if (inputElement) {
+                                    inputElement.style.backgroundColor = '#FFCCCC'; // Light red for incorrect
+                                }
+                            } else {
+                                if (inputElement) {
+                                    inputElement.style.backgroundColor = ''; // Reset background for correct
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (allCorrect) {
+                    crosswordMessageElement.textContent = '¡Felicidades! Has resuelto el crucigrama.';
+                    crosswordMessageElement.style.color = '#10B981'; // Green for success
+                    
+                    displayLevelCompleteMessage(crosswordPuzzles[currentDifficulty][currentPuzzleIndex].levelCompleteMessage);
+
+                } else {
+                    crosswordMessageElement.textContent = 'Hay errores. Sigue intentándolo.';
+                    crosswordMessageElement.style.color = '#EF4444'; // Red for incorrect
+                }
+            }
+
+            function resetCrossword() {
+                crosswordMessageElement.textContent = '';
+                crosswordMessageElement.style.color = '';
+                currentClueInfoElement.textContent = '';
+                document.querySelectorAll('.crossword-cell input').forEach(input => {
+                    input.style.backgroundColor = '';
+                });
+                loadPuzzle(currentPuzzleIndex); // Reload current puzzle to clear inputs
+            }
+
+            function loadPuzzle(index) {
+                // Hide level complete message and show game area
+                levelCompleteMessageDiv.classList.add('hidden');
+                crosswordGameArea.classList.remove('hidden');
+
+                const puzzlesOfDifficulty = crosswordPuzzles[currentDifficulty];
+                if (index < puzzlesOfDifficulty.length) {
+                    currentPuzzleIndex = index;
+                    const puzzleData = puzzlesOfDifficulty[currentPuzzleIndex];
+                    gridSize = puzzleData.gridSize; // Update gridSize for the current puzzle
+                    assignClueNumbersAndPrepareGridData(puzzleData.clues, puzzleData.gridSize);
+                    renderCrossword();
+                    crosswordMessageElement.textContent = '';
+                    currentClueInfoElement.textContent = '';
+                } else {
+                    // All puzzles in this difficulty completed
+                    levelCompleteText.textContent = `¡Felicidades! Has completado todos los crucigramas ${currentDifficulty}.`;
+                    nextCrosswordButton.textContent = "Volver a Elegir Dificultad";
+                    levelCompleteMessageDiv.classList.remove('hidden');
+                    crosswordGameArea.classList.add('hidden');
+                    nextCrosswordButton.classList.remove('hidden'); // Show button immediately to allow difficulty selection
+                }
+            }
+
+            function displayLevelCompleteMessage(message) {
+                crosswordGameArea.classList.add('hidden');
+                levelCompleteMessageDiv.classList.remove('hidden');
+                levelCompleteText.textContent = message;
+                nextCrosswordButton.classList.add('hidden'); // Hide until timer expires
+
+                setTimeout(() => {
+                    nextCrosswordButton.classList.remove('hidden');
+                    nextCrosswordButton.textContent = 'Siguiente Nivel';
+                    if (currentPuzzleIndex + 1 >= crosswordPuzzles[currentDifficulty].length) {
+                         nextCrosswordButton.textContent = 'Volver a Elegir Dificultad';
+                    }
+                }, 30000); // Show button after 30 seconds
+            }
+
+            // Event Listeners for difficulty buttons
+            difficultyButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    currentDifficulty = e.target.dataset.difficulty;
+                    currentPuzzleIndex = 0; // Reset to the first puzzle for the new difficulty
+                    loadPuzzle(currentPuzzleIndex);
+                });
+            });
+
+            // Event listener for next crossword button
+            nextCrosswordButton.addEventListener('click', () => {
+                if (currentPuzzleIndex + 1 < crosswordPuzzles[currentDifficulty].length) {
+                    loadPuzzle(currentPuzzleIndex + 1);
+                } else {
+                    // All puzzles in current difficulty completed, go back to difficulty selection
+                    loadPuzzle(0); // Load the first puzzle of the current difficulty or simply reset
+                    currentPuzzleIndex = 0; // Ensure index is reset
+                    // Make difficulty buttons visible again
+                    difficultyButtons.forEach(btn => btn.classList.remove('hidden'));
+                    crosswordGameArea.classList.add('hidden');
+                    levelCompleteMessageDiv.classList.add('hidden'); // Hide level complete message
+                    // Or, if desired, show a final "all complete" message and let them choose difficulty
+                }
+            });
+
+
+            // Event Listeners for crossword buttons
+            checkButton.addEventListener('click', checkCrossword);
+            resetButton.addEventListener('click', resetCrossword);
+
+            return {
+                initGame: (initialDifficulty = 'easy') => {
+                    currentDifficulty = initialDifficulty;
+                    currentPuzzleIndex = 0;
+                    crosswordGameArea.classList.remove('hidden'); // Ensure game area is visible on init
+                    levelCompleteMessageDiv.classList.add('hidden'); // Ensure level complete message is hidden
+                    loadPuzzle(currentPuzzleIndex);
+                    crosswordMessageElement.textContent = ''; // Clear message on init
+                    currentClueInfoElement.textContent = '';
+                }
+            };
+        })();
+
+
+        // --- Initialization on Window Load ---
         window.onload = function() {
-            initBoard(); // Inicializa el tablero
-            drawBoard(); // Dibuja el tablero vacío
-            gameMessage.textContent = 'Pulsa "Iniciar Juego" para jugar';
-            gameMessage.classList.remove('hidden'); // Muestra el mensaje de inicio
-            startButton.textContent = "Iniciar Juego";
-            startButton.classList.remove('hidden'); // Asegura que el botón de inicio sea visible
-            pauseButton.classList.add('hidden'); // Asegura que el botón de pausa esté oculto al inicio
-
-            // No iniciar gameLoop aquí, se iniciará con el botón
+            showGamePortal(); // Show the game portal by default
         };
     </script>
 </body>
