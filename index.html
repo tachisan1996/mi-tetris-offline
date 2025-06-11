@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tetris Pastel</title>
+    <title>Tetris Pastel Intenso</title>
     <style>
         /* Estilo personalizado para el canvas del juego */
         canvas {
-            background-color: #f0f4f8; /* Un azul muy claro y suave */
-            border: 4px solid #a7d9f7; /* Borde azul pastel */
+            background-color: #e0e7ee; /* Un gris azulado muy claro para un mejor contraste con colores intensos */
+            border: 4px solid #7cb9e8; /* Borde azul vibrante */
             border-radius: 12px; /* Esquinas redondeadas para el canvas */
             display: block;
             margin: 0 auto;
@@ -18,7 +18,7 @@
         /* Estilo general para el cuerpo de la página */
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #e0f2f7 0%, #c8e6c9 100%); /* Degradado suave de pastel */
+            background: linear-gradient(135deg, #a7d9f7 0%, #b2e6b2 100%); /* Degradado suave pero más vivo */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -27,7 +27,7 @@
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
-            color: #4a5568; /* Color de texto suave */
+            color: #2d3748; /* Color de texto más oscuro para legibilidad */
         }
 
         /* Contenedor principal del juego */
@@ -37,7 +37,7 @@
             align-items: center;
             background-color: #ffffff; /* Fondo blanco para el contenedor */
             border-radius: 20px; /* Esquinas más redondeadas */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); /* Sombra suave */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
             padding: 25px;
             gap: 20px; /* Espacio entre elementos */
             position: relative; /* Para posicionar los mensajes */
@@ -49,10 +49,10 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 3em;
+            font-size: 3.2em; /* Un poco más grande */
             font-weight: bold;
             color: #ef4444; /* Rojo vibrante */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.4); /* Sombra más fuerte */
             z-index: 10;
             opacity: 0;
             transition: opacity 0.3s ease-out, transform 0.3s ease-out;
@@ -61,13 +61,13 @@
         }
 
         #level-up-message {
-            color: #4CAF50; /* Verde para mensajes de nivel */
-            font-size: 2.5em; /* Un poco más pequeño que los combos */
+            color: #10B981; /* Verde más intenso para mensajes de nivel */
+            font-size: 2.8em; /* Un poco más grande y notorio */
         }
 
         #combo-message.show, #level-up-message.show {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1.1);
+            transform: translate(-50%, -50%) scale(1.15); /* Efecto de escala más pronunciado */
         }
 
         /* Estilo para los botones de control (Pausa, Inicio/Reiniciar) */
@@ -86,11 +86,11 @@
         }
 
         .game-button.start-button {
-            background-color: #4CAF50; /* Verde para iniciar/reiniciar */
+            background-color: #10B981; /* Verde más intenso para iniciar/reiniciar */
         }
 
         .game-button.pause-button {
-            background-color: #FFC107; /* Amarillo para pausa */
+            background-color: #F59E0B; /* Naranja más intenso para pausa */
         }
 
         .game-button:hover {
@@ -98,10 +98,10 @@
         }
 
         .game-button.start-button:hover {
-            background-color: #45a049; /* Verde más oscuro al pasar el ratón */
+            background-color: #059669; /* Verde más oscuro al pasar el ratón */
         }
         .game-button.pause-button:hover {
-            background-color: #FFA000; /* Amarillo más oscuro al pasar el ratón */
+            background-color: #D97706; /* Naranja más oscuro al pasar el ratón */
         }
 
         .game-button:active {
@@ -116,10 +116,10 @@
                 gap: 15px;
             }
             #combo-message {
-                font-size: 2.2em;
+                font-size: 2.5em;
             }
             #level-up-message {
-                font-size: 1.8em;
+                font-size: 2em;
             }
             .game-button {
                 padding: 0.6rem 1.2rem;
@@ -130,7 +130,7 @@
 </head>
 <body class="selection:bg-pink-200 selection:text-pink-800">
     <div class="game-container">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 mb-4 text-center">Tetris Pastel</h1>
+        <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 mb-4 text-center">Tetris Pastel Intenso</h1>
         <div id="game-info" class="text-lg font-semibold text-gray-700 mb-3 text-center">
             Puntuación: <span id="score">0</span> | Nivel: <span id="level">1</span> | Siguiente: <span id="next-piece-display"></span>
         </div>
@@ -155,7 +155,7 @@
 
         const COLS = 10; // Columnas del tablero
         const ROWS = 20; // Filas del tablero
-        const BLOCK_SIZE = 35; // Tamaño de cada bloque en píxeles (AUMENTADO)
+        const BLOCK_SIZE = 35; // Tamaño de cada bloque en píxeles
 
         // Ajusta el tamaño del canvas
         canvas.width = COLS * BLOCK_SIZE;
@@ -172,9 +172,9 @@
 
         let level = 1; // Nivel actual del juego
         let linesClearedTotal = 0; // Total de líneas limpiadas en el juego (se mantiene para estadísticas, pero el score define el nivel)
-        const BASE_FALL_INTERVAL = 500; // Intervalo de caída base en ms (0.5 segundos)
+        const BASE_FALL_INTERVAL = 600; // Intervalo de caída base en ms (un poco más lento para empezar)
         let currentFallInterval = BASE_FALL_INTERVAL; // Intervalo de caída actual
-        let nextLevelScoreThreshold = 2000; // Puntos necesarios para el siguiente nivel
+        let nextLevelScoreThreshold = 500; // Puntos necesarios para el siguiente nivel (Nivel 1 a 2)
         let isPaused = false; // Variable para controlar el estado de pausa
         let gameStarted = false; // Variable para controlar si el juego ha iniciado
 
@@ -187,15 +187,15 @@
         const startButton = document.getElementById('startButton'); // Referencia al nuevo botón de inicio
         const pauseButton = document.getElementById('pauseButton');
 
-        // --- Colores Pastel para las Piezas ---
+        // --- Colores Intensos para las Piezas ---
         const COLORS = [
-            '#FFD1DC', // Rosa Pastel (I)
-            '#FFECB3', // Amarillo Claro Pastel (O)
-            '#B2EBF2', // Azul Claro Pastel (T)
-            '#C8E6C9', // Verde Menta Pastel (S)
-            '#F0F4C3', // Crema Pastel (Z)
-            '#B3E0FF', // Azul Cielo Pastel (J)
-            '#D1C4E9'  // Lavanda Pastel (L)
+            '#FF69B4', // Rosa Fuerte (Hot Pink) - I
+            '#FFD700', // Oro (Gold) - O
+            '#00BFFF', // Azul Cielo Profundo (Deep Sky Blue) - T
+            '#32CD32', // Verde Lima (Lime Green) - S
+            '#FF4500', // Naranja Rojo (Orange Red) - Z
+            '#4169E1', // Azul Real (Royal Blue) - J
+            '#9932CC'  // Púrpura (Dark Orchid) - L
         ];
 
         // --- Definición de Piezas (Tetrominoes) ---
@@ -348,12 +348,14 @@
                         level++;
                         levelDisplay.textContent = level;
                         // Recalcula el umbral de puntos para el siguiente nivel
-                        // Nivel 1 a 2: 2000, Nivel 2 a 3: 3000, Nivel 3 a 4: 4000, etc.
-                        nextLevelScoreThreshold = 2000 + (level - 1) * 1000;
+                        // Nivel 1 a 2: 500, Nivel 2 a 3: 500 + 1000 = 1500, Nivel 3 a 4: 1500 + 1000 = 2500
+                        nextLevelScoreThreshold += 1000; // Incrementa el umbral en 1000 para el siguiente nivel
 
                         // Reduce el intervalo de caída para aumentar la velocidad (dificultad)
-                        currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 50));
-                        displayLevelUpMessage(); // Muestra el mensaje de nivel
+                        // currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 50)); // Escalado de dificultad
+                        // Escalado de dificultad más agresivo
+                        currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 75)); // Aumenta la velocidad más rápido
+                        displayLevelUpMessage(); // Muestra el mensaje de nivel (chiste)
                     }
 
                     // Efectos especiales para combos
@@ -452,28 +454,28 @@
             }, 700); // El mensaje desaparece después de 0.7 segundos
         }
 
-        // Mensajes para subir de nivel
-        const levelUpMessages = [
-            "¡Felicidades, eres imparable! Nuevo Nivel.",
-            "¡Impresionante! ¡A por el siguiente reto!",
-            "¡Subiste de nivel! Sigue así.",
-            "¿Sabías que el Tetris fue creado en 1984? ¡Sigue haciendo historia!",
-            "¡Guau! Tu concentración es de otro nivel. ¡Literalmente!",
-            "El Tetris es como la vida, siempre buscando el encaje perfecto. ¡Vas genial!",
-            "¿Qué hace un Tetris triste? ¡Se siente bloqueado! Pero tú no, ¡felicidades!",
-            "¡Has alcanzado el siguiente nivel de la maestría en Tetris! ¡Adelante!",
-            "Cada pieza es una oportunidad, y tú las aprovechas. ¡Nuevo nivel desbloqueado!",
-            "¡Increíble! Sigue apilando éxitos y no solo bloques."
+        // Chistes para subir de nivel
+        const levelUpJokes = [
+            "¿Qué le dice un Tetris a otro? ¡Deja de apilarte, que me ahogo!",
+            "¿Por qué el Tetris nunca gana en un debate? ¡Siempre se queda bloqueado!",
+            "Un Tetris entra a un bar... y le dicen: 'Lo siento, aquí no se permiten piezas sueltas'.",
+            "¿Cuál es el colmo de un Tetris? ¡Que se le caigan todas las líneas!",
+            "Mi vida es como un Tetris: si todo encaja, desaparece.",
+            "¿Qué hace un Tetris en el gimnasio? ¡Forma cubos!",
+            "¿Por qué los Tetris son buenos en matemáticas? ¡Porque siempre están calculando ángulos!",
+            "Mi psicólogo me dijo que mi ansiedad se debía a un juego de Tetris mal resuelto en mi pasado.",
+            "¿Qué es un Tetris bailando? ¡Un baile de bloques!",
+            "¡Felicidades! Has superado otro nivel, ahora el juego se pone más... en línea."
         ];
 
-        // Muestra un mensaje de nivel en la pantalla
+        // Muestra un chiste de nivel en la pantalla
         function displayLevelUpMessage() {
-            const randomIndex = Math.floor(Math.random() * levelUpMessages.length);
-            levelUpMessageElement.textContent = levelUpMessages[randomIndex];
+            const randomIndex = Math.floor(Math.random() * levelUpJokes.length);
+            levelUpMessageElement.textContent = `¡Nivel ${level}! ` + levelUpJokes[randomIndex];
             levelUpMessageElement.classList.add('show');
             setTimeout(() => {
                 levelUpMessageElement.classList.remove('show');
-            }, 2000); // El mensaje de nivel dura más (2 segundos)
+            }, 2500); // El chiste dura un poco más (2.5 segundos)
         }
 
         // Bucle principal del juego
@@ -501,7 +503,7 @@
             level = 1;
             linesClearedTotal = 0;
             currentFallInterval = BASE_FALL_INTERVAL;
-            nextLevelScoreThreshold = 2000;
+            nextLevelScoreThreshold = 500; // Reinicia el umbral para el Nivel 1 -> 2
             isPaused = false;
             gameOver = false;
             gameStarted = true; // El juego ha iniciado
@@ -571,9 +573,9 @@
         // --- Controles Táctiles en el Canvas ---
         let touchStartX = 0;
         let touchStartY = 0;
-        const tapThreshold = 10;
-        const swipeThreshold = 30;
-        const hardDropSwipeThreshold = 100;
+        const tapThreshold = 10; // Reducido para mayor sensibilidad al toque
+        const swipeThreshold = 25; // Reducido para mayor sensibilidad al deslizamiento
+        const hardDropSwipeThreshold = 90; // Reducido para hacer el hard drop más fácil de activar
 
         canvas.addEventListener('touchstart', e => {
             e.preventDefault();
