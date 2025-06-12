@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minijuegos Divertidos</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap CSS for modals -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    
     <style>
         /* Estilos generales para el portal */
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #a7d9f7 0%, #b2e6b2 100%); /* Pastel gradient */
+            background: linear-gradient(135deg, #a7d9f7 0%, #b2e6b2 100%); /* Degradado pastel */
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* Align to start to leave space for title */
+            justify-content: flex-start; /* Alinea al inicio para dejar espacio al título */
             align-items: center;
             min-height: 100vh;
             margin: 0;
@@ -21,15 +26,15 @@
         }
 
         h1 {
-            color: #007bff; /* Vibrant blue for main title */
+            color: #007bff; /* Azul vibrante para el título principal */
             margin-bottom: 30px;
             font-size: 2.8em;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
         }
 
-        /* Main container for portal or game */
+        /* Contenedor principal del portal o juego */
         .game-container {
-            display: flex; /* Flex for portal and games */
+            display: flex; /* Flex para el portal y los juegos */
             flex-direction: column;
             align-items: center;
             background-color: #ffffff;
@@ -37,17 +42,17 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             padding: 25px;
             gap: 20px;
-            width: 100%; /* Occupy full available width */
-            max-width: 900px; /* Limit max width */
-            box-sizing: border-box; /* Include padding in width */
+            width: 100%; /* Ocupa todo el ancho disponible */
+            max-width: 900px; /* Limita el ancho máximo */
+            box-sizing: border-box; /* Incluye padding en el ancho */
         }
 
         .game-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Responsive columns */
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* Columnas responsivas */
             gap: 25px;
             padding: 20px;
-            width: 100%; /* Occupy 100% of container */
+            width: 100%; /* Ocupa el 100% del contenedor */
         }
 
         .game-card {
@@ -69,7 +74,7 @@
         }
 
         .game-icon {
-            font-size: 4em; /* Large icon size */
+            font-size: 4em; /* Tamaño grande para los iconos */
             margin-bottom: 10px;
         }
 
@@ -83,11 +88,11 @@
             font-size: 0.9em;
             color: #666;
             margin-bottom: 15px;
-            flex-grow: 1; /* Allows description to take up space */
+            flex-grow: 1; /* Permite que la descripción ocupe espacio */
         }
 
         .play-button {
-            background-color: #28a745; /* Green for play */
+            background-color: #28a745; /* Verde para jugar */
             color: white;
             font-weight: bold;
             padding: 10px 20px;
@@ -102,7 +107,7 @@
         }
 
         .back-button {
-            background-color: #6c757d; /* Gray for back */
+            background-color: #6c757d; /* Gris para volver */
             color: white;
             font-weight: bold;
             padding: 10px 20px;
@@ -117,14 +122,14 @@
             background-color: #5a6268;
         }
 
-        /* Container for individual games (hidden by default) */
+        /* Contenedor para los juegos individuales (oculto por defecto) */
         .game-screen {
-            display: none; /* Hidden by default */
-            /* Layout properties (flex, align-items, etc.) apply when shown */
+            display: none; /* Oculto por defecto */
+            /* Las propiedades de diseño (flex, align-items, etc.) se aplican al mostrar */
             flex-direction: column;
             align-items: center;
             width: 100%;
-            max-width: 600px; /* Max width for individual games */
+            max-width: 600px; /* Ancho máximo para los juegos individuales */
             background-color: #ffffff;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
@@ -133,7 +138,7 @@
             gap: 15px;
         }
 
-        /* Tetris specific styles (copied from previous version) */
+        /* Estilos específicos para el juego Tetris */
         #tetrisCanvas {
             background-color: #e0e7ee;
             border: 4px solid #7cb9e8;
@@ -210,157 +215,99 @@
             }
         }
 
-        /* Crossword game styles */
-        #crossword-grid {
-            display: grid;
-            border: 2px solid #6c757d;
-            margin-bottom: 20px;
+        /* Custom styles for the crossword grid based on table structure */
+        /* CSS Variables for custom colors - Updated to pastel vivo palette */
+        :root {
+            --c: #B19CD9; /* Soft Lavender for vertical word */
+            --d: #AEC6CF; /* Muted Blue for cell border */
+            --e: #E0FFFF; /* Light Cyan for empty cell background */
+            --f: #A7D9B4; /* Soft Green for correct word / hover background */
+            --h: #333333; /* Dark Grey for text in filled cells */
+            --table-primary: var(--c); 
+            --table-secondary: var(--e);
+            --table-border: var(--d);
+            --correct-answer: var(--f);
+            --wrong-answer: #EF4444; /* Red for error, kept for clear indication */
         }
-        .crossword-cell {
-            width: 45px; /* Increased cell size */
-            height: 45px; /* Increased cell size */
-            border: 1px solid #ccc;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5em; /* Larger font */
-            font-weight: bold;
-            text-transform: uppercase;
-            background-color: white;
-            box-sizing: border-box; /* Include padding/border in size */
-            position: relative; /* For numbering in the corner */
+
+        .crossword-table {
+            border-collapse: collapse;
+            margin: 0 auto;
         }
-        .crossword-cell.black {
-            background-color: #333;
-            border: 1px solid #333;
+
+        .crossword-table td {
+            width: 40px; /* Reduced width for more compact grid */
+            height: 40px; /* Reduced height for more compact grid */
+            border: 1px solid var(--table-border);
+            text-align: center;
+            vertical-align: middle;
+            background-color: var(--e); /* Empty cell background */
+            position: relative; /* For input positioning */
+            border-radius: 4px; /* Rounded corners for cells */
         }
-        .crossword-cell.active {
-            background-color: #fffacd; /* Light yellow */
-            border: 2px solid #f0e68c; /* Darker yellow */
-        }
-        .crossword-cell input {
+
+        .crossword-table td input {
             width: 100%;
             height: 100%;
             border: none;
+            background-color: transparent;
             text-align: center;
-            background: transparent;
-            font-size: inherit;
-            font-weight: inherit;
+            font-weight: bold;
             text-transform: uppercase;
+            color: var(--h); /* Text color */
             padding: 0;
-            margin: 0;
-            box-sizing: border-box;
             outline: none;
+            box-shadow: none;
+            border-radius: 4px; /* Match cell rounding */
+            transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            font-size: 1.2rem; /* Reduced font size for better fit */
         }
-        .clues-container {
-            display: flex;
-            gap: 30px;
-            width: 100%;
-            justify-content: space-around;
-            flex-wrap: wrap;
+
+        .crossword-table .table-primary {
+            background-color: var(--table-primary); /* Vertical word cell color */
         }
-        .clues-column {
-            flex: 1;
-            min-width: 250px;
+
+        .crossword-table .table-secondary {
+            background-color: var(--table-secondary); /* Fillable cell background */
         }
-        .clues-column h3 {
-            color: #065F46;
-            margin-bottom: 10px;
+
+        .crossword-table .table-secondary input.correct-answer {
+            background-color: var(--correct-answer); /* Correct answer background */
+            color: var(--h); /* Text color for correct answer, adjusted to contrast with pastel */
         }
-        .clues-column ol {
-            list-style-type: decimal;
-            padding-left: 20px;
-        }
-        .clues-column li {
-            margin-bottom: 5px;
-            font-size: 0.95em;
-            color: #555;
-        }
-        #crossword-message {
-            margin-top: 15px;
-            font-weight: bold;
-            color: #333;
-        }
-        #crossword-check-button, #crossword-reset-button {
-            background-color: #10B981;
+
+        .crossword-table .table-secondary input.wrong-answer {
+            background-color: var(--wrong-answer); /* Wrong answer background */
             color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-            margin-top: 15px;
-        }
-        #crossword-check-button:hover, #crossword-reset-button:hover {
-            background-color: #065F46;
         }
 
-        /* Numbering in the corner of crossword cells */
-        .crossword-cell .clue-number {
-            position: absolute;
-            top: 2px;
-            left: 2px;
-            font-size: 0.7em;
-            color: #777;
-            pointer-events: none; /* Does not interfere with input */
-            background-color: transparent; /* No background */
-            padding: 1px 2px;
-            border-radius: 3px;
+        .crossword-cell.flash-correct {
+            animation: flashCorrect 0.5s ease-out;
         }
 
-        #crossword-current-clue-info {
-            font-size: 1.1em;
-            margin-top: 10px;
-            color: #007bff;
-            font-weight: bold;
+        @keyframes flashCorrect {
+            0% { background-color: #d1fae5; /* green-100 */ }
+            50% { background-color: #34d399; /* green-400 */ }
+            100% { background-color: var(--correct-answer); } /* Revert to correct-answer color */
         }
 
-        .difficulty-buttons {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .difficulty-buttons .game-button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        .difficulty-buttons .game-button:hover {
-            background-color: #0056b3;
-        }
-        .level-message {
-            text-align: center;
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #e6f7ff;
-            border: 1px solid #91d5ff;
-            border-radius: 10px;
-            color: #2d3748;
-            font-size: 1.1em;
-            font-weight: bold;
-        }
-        .level-message p {
-            margin-bottom: 10px;
-        }
-        .level-message .game-button {
-            margin-top: 10px;
+        /* Style for guessed hints */
+        .hint-guessed {
+            text-decoration: line-through;
+            color: #9ca3af; /* gray-400 */
         }
 
-        .hidden {
-            display: none !important;
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
         }
     </style>
 </head>
 <body>
-    <!-- Main Game Portal Section -->
+    <!-- Sección Principal del Portal de Juegos -->
     <div id="game-portal-section" class="game-container">
         <h1>Minijuegos Divertidos</h1>
         <div class="game-grid">
-            <!-- Tetris Game Card -->
+            <!-- Tarjeta del Juego Tetris -->
             <div class="game-card" data-game-id="tetris">
                 <span class="game-icon">🧱</span>
                 <h2>Tetris Pastel Intenso</h2>
@@ -368,9 +315,9 @@
                 <button class="play-button">Jugar</button>
             </div>
 
-            <!-- Crossword Game Card -->
+            <!-- Tarjeta del Juego de Crucigrama -->
             <div class="game-card" data-game-id="crossword">
-                <span class="game-icon">📝</span> <!-- Pencil/paper icon -->
+                <span class="game-icon">📝</span> <!-- Icono de lápiz/papel -->
                 <h2>Crucigrama Cultural</h2>
                 <p>¡Pon a prueba tus conocimientos con este divertido crucigrama!</p>
                 <button class="play-button">Jugar</button>
@@ -378,102 +325,188 @@
         </div>
     </div>
 
-    <!-- Tetris Game Section (Hidden by default) -->
+    <!-- Sección del Juego Tetris (Oculta por defecto) -->
     <div id="tetris-game-section" class="game-screen">
         <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 mb-4 text-center">Tetris Pastel Intenso</h1>
-        <div id="game-info" class="text-lg font-semibold text-gray-700 mb-3 text-center">
+        <div id="game-info">
             Puntuación: <span id="score">0</span> | Nivel: <span id="level">1</span> | Siguiente: <span id="next-piece-display"></span>
         </div>
         <canvas id="tetrisCanvas"></canvas>
-        <div id="game-message" class="text-2xl font-bold text-red-500 mt-4"></div>
+        <div id="game-message"></div>
         <div id="combo-message"></div>
         <div id="level-up-message"></div>
 
-        <div class="flex gap-4 mt-2">
+        <div class="button-container">
             <button id="tetris-start-button" class="game-button start-button">Iniciar Juego</button>
             <button id="tetris-pause-button" class="game-button pause-button hidden">Pausar</button>
         </div>
         <button id="back-to-portal-tetris" class="back-button">Volver a Minijuegos</button>
     </div>
 
-    <!-- Crossword Game Section (Hidden by default) -->
+    <!-- Sección del Juego de Crucigrama (Oculta por defecto) -->
     <div id="crossword-game-section" class="game-screen">
-        <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 mb-4 text-center">Crucigrama Cultural</h1>
-        
-        <div class="difficulty-buttons">
-            <button data-difficulty="easy" class="game-button">Fácil</button>
-            <button data-difficulty="medium" class="game-button">Medio</button>
-            <button data-difficulty="hard" class="game-button">Difícil</button>
-        </div>
+        <h1 class="text-4xl font-extrabold text-center text-gray-800 mb-6">
+            <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">Crucigramas</span>
+            <span class="block text-2xl text-gray-600 mt-2">Cultura General</span>
+        </h1>
 
-        <div id="crossword-game-area">
-            <div id="crossword-grid"></div>
-            <div id="crossword-current-clue-info"></div> <!-- Current clue information -->
-            <div class="clues-container">
-                <div class="clues-column">
-                    <h3>Horizontales</h3>
-                    <ol id="crossword-clues-across"></ol>
-                </div>
-                <div class="clues-column">
-                    <h3>Verticales</h3>
-                    <ol id="crossword-clues-down"></ol>
-                </div>
-            </div>
-            <div id="crossword-message"></div>
-            <div class="flex gap-4">
-                <button id="crossword-check-button" class="game-button start-button">Comprobar</button>
-                <button id="crossword-reset-button" class="game-button pause-button">Reiniciar</button>
+        <!-- Level Selection -->
+        <div id="level-selection" class="flex flex-col items-center justify-center space-y-4">
+            <p class="text-lg text-gray-700">Selecciona un nivel para comenzar:</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button id="btn-facil" class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">Fácil</button>
+                <button id="btn-medio" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">Medio</button>
+                <button id="btn-dificil" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105">Difícil</button>
             </div>
         </div>
 
-        <div id="level-complete-message" class="level-message hidden">
-            <p id="level-complete-text"></p>
-            <button id="next-crossword-button" class="game-button hidden">Siguiente Nivel</button>
+        <!-- Game Area -->
+        <div id="game-area" class="hidden flex flex-col md:flex-row gap-8">
+            <!-- Left Panel: Crossword Grid -->
+            <div class="flex-1 bg-gray-50 p-6 rounded-lg shadow-inner">
+                <h2 id="crossword-title" class="text-2xl font-semibold text-gray-700 mb-4 text-center"></h2>
+                <div id="cpuzzle" class="crossword-grid mx-auto">
+                    <!-- Crossword table will be injected here by JavaScript -->
+                </div>
+                <div class="mt-4">
+                    <div class="progress" role="progressbar" aria-label="Progreso del Crucigrama" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-blue-500" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Pistas and Input -->
+            <div class="flex-1 bg-gray-50 p-6 rounded-lg shadow-inner flex flex-col space-y-6">
+                <div>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-3">Pistas:</h3>
+                    <ol id="references" class="list-decimal list-inside text-gray-600 space-y-1 text-sm md:text-base">
+                        <!-- Hints will be injected here by JavaScript -->
+                    </ol>
+                </div>
+
+                <div class="flex flex-col space-y-4">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-2">Ingresar Respuesta (Clic en celda para escribir):</h3>
+                    <div id="message-display" class="text-center font-medium mt-2 transition duration-300 ease-in-out"></div>
+                </div>
+                <div id="score-display" class="text-xl font-semibold text-gray-700 text-center mt-4">Puntuación: 0</div>
+                <div id="crossword-counter" class="text-lg text-gray-500 text-center">Crucigrama 0 de 5</div>
+
+                <button id="reveal-letter-btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 mt-4">Revelar Letra (10 Puntos)</button>
+                <button id="next-crossword-btn" class="hidden bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 mt-4">Siguiente Crucigrama</button>
+                <button id="restart-game-btn" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 mt-2">Reiniciar Crucigrama Actual</button>
+                <button id="menu-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 mt-2">Menú Principal</button>
+                <button id="config-btn" class="bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105 mt-2" data-bs-toggle="modal" data-bs-target="#configurationModal">
+                    ⚙️ Configurar Colores
+                </button>
+            </div>
         </div>
 
+        <!-- Bootstrap Modal for Configuration -->
+        <div class="modal fade" id="configurationModal" tabindex="-1" data-bs-backdrop="static" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">🔩 Configuración</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form class="form" id="colorForm">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="colorC" class="form-label">Palabra vertical:</label>
+                                    <input type="color" class="form-control form-control-color w-100" id="colorC" name="colorC" value="#B19CD9">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="colorD" class="form-label">Borde de las celdas:</label>
+                                    <input type="color" class="form-control form-control-color w-100" id="colorD" name="colorD" value="#AEC6CF">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="colorE" class="form-label">Celdas vacías:</label>
+                                    <input type="color" class="form-control form-control-color w-100" id="colorE" name="colorE" value="#E0FFFF">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="colorF" class="form-label">Palabra correcta/hover:</label>
+                                    <input type="color" class="form-control form-control-color w-100" id="colorF" name="colorF" value="#A7D9B4">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-evenly align-items-center">
+                        <button type="button" class="btn btn-primary d-flex align-items-center" onclick="reiniciarColores()">
+                            🔄 Reiniciar valores
+                        </button>
+                        <button type="button" class="btn btn-primary d-flex align-items-center" onclick="saveColors()">
+                            💽 Guardar cambios
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom success modal -->
+        <div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header bg-green-500 text-white">
+                        <h5 class="modal-title" id="successModalLabel">¡Felicidades!</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center text-lg text-gray-700">
+                        ¡Has completado el crucigrama con éxito!
+                    </div>
+                    <div class="modal-footer justify-content-center">
+                        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <button id="back-to-portal-crossword" class="back-button">Volver a Minijuegos</button>
     </div>
 
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
     <script>
-        // --- Global Navigation Variables ---
+        // --- Variables Globales de Navegación ---
         const gamePortalSection = document.getElementById('game-portal-section');
         const tetrisGameSection = document.getElementById('tetris-game-section');
         const crosswordGameSection = document.getElementById('crossword-game-section');
 
-        // Platformer game section removed as requested.
         const allGameSections = [tetrisGameSection, crosswordGameSection];
 
-        // --- Navigation Functions ---
+        // --- Funciones de Navegación ---
         function showSection(sectionToShow) {
             allGameSections.forEach(section => {
-                section.style.display = 'none'; // Hide all game sections
+                section.style.display = 'none'; // Oculta todas las secciones de juego
             });
-            gamePortalSection.style.display = 'none'; // Hide the portal section
+            gamePortalSection.style.display = 'none'; // Oculta la sección del portal
 
-            // Display the selected section as flex for proper layout
+            // Muestra la sección seleccionada como flex para un buen diseño
             sectionToShow.style.display = 'flex';
         }
 
         function showGamePortal() {
             allGameSections.forEach(section => {
-                section.style.display = 'none'; // Hide all game sections
+                section.style.display = 'none'; // Oculta todas las secciones de juego
             });
-            gamePortalSection.style.display = 'flex'; // Show the portal section
+            gamePortalSection.style.display = 'flex'; // Muestra la sección del portal
         }
 
-        // --- Event Listeners for Game Cards (Portal) ---
+        // --- Event Listeners para las Tarjetas de Juego (Portal) ---
         document.querySelectorAll('.game-card .play-button').forEach(button => {
             button.addEventListener('click', (event) => {
                 const gameId = event.target.closest('.game-card').dataset.gameId;
                 if (gameId === 'tetris') {
                     showSection(tetrisGameSection);
-                    // If Tetris is already initialized and game is over or not started, restart it.
+                    // Si Tetris ya está inicializado y el juego ha terminado o no ha comenzado, reinícialo.
                     if (window.tetrisGame && (window.tetrisGame.gameOver() || !window.tetrisGame.gameStarted())) {
                         window.tetrisGame.startGame();
                     } else if (window.tetrisGame && window.tetrisGame.isPaused()) {
-                         // If paused, just show the paused game screen.
+                         // Si está pausado, solo muestra la pantalla de juego pausada.
                     } else if (!window.tetrisGame) {
-                        // If Tetris is loaded for the first time
+                        // Si Tetris se carga por primera vez
                         document.getElementById('game-message').textContent = 'Pulsa "Iniciar Juego" para jugar';
                         document.getElementById('game-message').classList.remove('hidden');
                         document.getElementById('tetris-start-button').classList.remove('hidden');
@@ -481,61 +514,69 @@
                     }
                 } else if (gameId === 'crossword') {
                     showSection(crosswordGameSection);
-                    window.crosswordGame.initGame('easy'); // Default to easy when opening crossword
+                    // Llama a la nueva función de inicio del crucigrama para mostrar la selección de nivel
+                    setupLevelButtons(); // Muestra los botones de selección de nivel del crucigrama
+                    gameAreaDiv.classList.add('hidden'); // Oculta el área de juego hasta que se elija un nivel
+                    levelSelectionDiv.classList.remove('hidden'); // Muestra la selección de nivel
                 }
             });
         });
 
-        // --- Buttons to Return to Portal ---
+        // --- Botones de Volver al Portal ---
         document.getElementById('back-to-portal-tetris').addEventListener('click', () => {
             if (window.tetrisGame && !window.tetrisGame.gameOver()) {
-                // Pause Tetris if returning to portal and game is active
+                // Pausa Tetris si se regresa al portal y el juego está activo
                 if (!window.tetrisGame.isPaused()) {
                     window.tetrisGame.togglePause();
                 }
             }
             showGamePortal();
         });
-        document.getElementById('back-to-portal-crossword').addEventListener('click', showGamePortal);
+        document.getElementById('back-to-portal-crossword').addEventListener('click', () => {
+            levelSelectionDiv.classList.remove('hidden'); // Muestra los botones de selección de nivel
+            gameAreaDiv.classList.add('hidden'); // Oculta el área de juego
+            showGamePortal();
+        });
 
-
-        // --- TETRIS GAME LOGIC (Encapsulated) ---
+        // --- LÓGICA DEL JUEGO TETRIS (Encapsulada) ---
         window.tetrisGame = (() => {
             const canvas = document.getElementById('tetrisCanvas');
             const ctx = canvas.getContext('2d');
 
-            const COLS = 10;
-            const ROWS = 20;
-            const BLOCK_SIZE = 28; // Reduced block size
+            const COLS = 10; // Columnas del tablero
+            const ROWS = 20; // Filas del tablero
+            const BLOCK_SIZE = 28; // Tamaño de cada bloque en píxeles
 
             canvas.width = COLS * BLOCK_SIZE;
             canvas.height = ROWS * BLOCK_SIZE;
 
+            // Paletas de colores pastel para diferentes niveles
             const COLOR_PALETTES = [
-                [ '#FF69B4', '#FFD700', '#00BFFF', '#32CD32', '#FF4500', '#4169E1', '#9932CC' ],
-                [ '#FF00FF', '#FFFF00', '#00FFFF', '#00FF00', '#FF0000', '#0000FF', '#8A2BE2' ],
-                [ '#9ACD32', '#DAA520', '#6B8E23', '#5F9EA0', '#D2691E', '#8B4513', '#A0522D' ],
-                [ '#4B0082', '#1E90FF', '#BA55D3', '#20B2AA', '#FF1493', '#7B68EE', '#4682B4' ],
-                [ '#F08080', '#ADD8E6', '#90EE90', '#FFB6C1', '#DDA0DD', '#87CEEB', '#FFDAB9' ]
+                [ '#FF69B4', '#FFD700', '#00BFFF', '#32CD32', '#FF4500', '#4169E1', '#9932CC' ], // Pastel brillante
+                [ '#FF00FF', '#FFFF00', '#00FFFF', '#00FF00', '#FF0000', '#0000FF', '#8A2BE2' ], // Colores primarios
+                [ '#9ACD32', '#DAA520', '#6B8E23', '#5F9EA0', '#D2691E', '#8B4513', '#A0522D' ], // Tonos tierra
+                [ '#4B0082', '#1E90FF', '#BA55D3', '#20B2AA', '#FF1493', '#7B68EE', '#4682B4' ], // Tonos fríos
+                [ '#F08080', '#ADD8E6', '#90EE90', '#FFB6C1', '#DDA0DD', '#87CEEB', '#FFDAB9' ]  // Tonos cálidos y suaves
             ];
-            let COLORS = COLOR_PALETTES[0]; 
+            let COLORS = COLOR_PALETTES[0]; // Paleta de colores actual, inicia con la primera
 
-            let board = [];
-            let currentPiece;
-            let nextPiece;
-            let score = 0;
-            let gameOver = false;
-            let gameLoopId;
-            let lastUpdateTime = 0;
+            let board = []; // El tablero de juego
+            let currentPiece; // La pieza que está cayendo actualmente
+            let nextPiece; // La siguiente pieza que caerá
+            let score = 0; // Puntuación actual
+            let gameOver = false; // Estado del juego (true si game over)
+            let gameLoopId; // ID del ciclo de juego para requestAnimationFrame
+            let lastUpdateTime = 0; // Marca de tiempo de la última actualización para controlar la caída
 
-            let level = 1;
-            let linesClearedTotal = 0;
-            const BASE_FALL_INTERVAL = 600;
-            let currentFallInterval = BASE_FALL_INTERVAL;
-            let nextLevelScoreThreshold = 500;
-            let isPaused = false;
-            let gameStarted = false;
+            let level = 1; // Nivel actual
+            let linesClearedTotal = 0; // Total de líneas eliminadas
+            const BASE_FALL_INTERVAL = 600; // Intervalo de caída base (ms)
+            let currentFallInterval = BASE_FALL_INTERVAL; // Intervalo de caída actual
+            let nextLevelScoreThreshold = 500; // Puntuación para el siguiente nivel
+            let isPaused = false; // Estado de pausa
+            let gameStarted = false; // Indica si el juego ha comenzado
 
+            // Elementos del DOM para actualizar la UI
             const scoreDisplay = document.getElementById('score');
             const levelDisplay = document.getElementById('level');
             const gameMessage = document.getElementById('game-message');
@@ -545,125 +586,217 @@
             const startButton = document.getElementById('tetris-start-button');
             const pauseButton = document.getElementById('tetris-pause-button');
 
+            // Formas de los Tetrominós y sus colores iniciales
             const TETROMINO_SHAPES = {
-                'I': { shape: [[1, 1, 1, 1]], colorIndex: 0 }, 'O': { shape: [[1, 1], [1, 1]], colorIndex: 1 },
-                'T': { shape: [[0, 1, 0], [1, 1, 1]], colorIndex: 2 }, 'S': { shape: [[0, 1, 1], [1, 1, 0]], colorIndex: 3 },
-                'Z': { shape: [[1, 1, 0], [0, 1, 1]], colorIndex: 4 }, 'J': { shape: [[1, 0, 0], [1, 1, 1]], colorIndex: 5 },
+                'I': { shape: [[1, 1, 1, 1]], colorIndex: 0 },
+                'O': { shape: [[1, 1], [1, 1]], colorIndex: 1 },
+                'T': { shape: [[0, 1, 0], [1, 1, 1]], colorIndex: 2 },
+                'S': { shape: [[0, 1, 1], [1, 1, 0]], colorIndex: 3 },
+                'Z': { shape: [[1, 1, 0], [0, 1, 1]], colorIndex: 4 },
+                'J': { shape: [[1, 0, 0], [1, 1, 1]], colorIndex: 5 },
                 'L': { shape: [[0, 0, 1], [1, 1, 1]], colorIndex: 6 }
             };
 
+            // Clase para representar una pieza de Tetris
             class Piece {
                 constructor(shapeType) {
                     const { shape, colorIndex } = TETROMINO_SHAPES[shapeType];
-                    this.shape = shape; this.color = COLORS[colorIndex];
-                    this.x = Math.floor(COLS / 2) - Math.floor(shape[0].length / 2); this.y = 0;
+                    this.shape = shape;
+                    this.color = COLORS[colorIndex];
+                    // Posiciona la pieza en el centro superior del tablero
+                    this.x = Math.floor(COLS / 2) - Math.floor(shape[0].length / 2);
+                    this.y = 0;
                     this.shapeType = shapeType;
                 }
+
+                // Dibuja la pieza en el canvas
                 draw() {
                     this.shape.forEach((row, r) => {
                         row.forEach((value, c) => {
-                            if (value > 0) {
+                            if (value > 0) { // Si la celda de la forma no está vacía
                                 ctx.fillStyle = this.color;
                                 ctx.fillRect(this.x * BLOCK_SIZE + c * BLOCK_SIZE, this.y * BLOCK_SIZE + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                                ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+                                ctx.strokeStyle = '#fff'; // Borde blanco
+                                ctx.lineWidth = 1;
                                 ctx.strokeRect(this.x * BLOCK_SIZE + c * BLOCK_SIZE, this.y * BLOCK_SIZE + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                             }
                         });
                     });
                 }
+
+                // Mueve la pieza en el tablero (dx, dy son los cambios en x e y)
                 move(dx, dy) {
-                    if (!this.collision(dx, dy, this.shape)) { this.x += dx; this.y += dy; return true; }
-                    return false;
+                    if (!this.collision(dx, dy, this.shape)) {
+                        this.x += dx;
+                        this.y += dy;
+                        return true; // Movimiento exitoso
+                    }
+                    return false; // Colisión detectada
                 }
+
+                // Rota la pieza
                 rotate() {
+                    // Función para transponer una matriz (cambiar filas por columnas)
                     const transpose = (matrix) => matrix[0].map((_, i) => matrix.map(row => row[i]));
+                    // Función para invertir las filas de una matriz
                     const reverseRows = (matrix) => matrix.map(row => [...row].reverse());
+
                     let rotatedShape = transpose(this.shape);
-                    if (this.shapeType === 'I' || this.shapeType === 'S' || this.shapeType === 'Z') { rotatedShape = reverseRows(rotatedShape); } else { rotatedShape = rotatedShape.reverse(); }
-                    if (!this.collision(0, 0, rotatedShape)) { this.shape = rotatedShape; return true; }
+                    // Reglas de rotación específicas para algunas piezas
+                    if (this.shapeType === 'I' || this.shapeType === 'S' || this.shapeType === 'Z') {
+                        rotatedShape = reverseRows(rotatedShape);
+                    } else {
+                        rotatedShape = rotatedShape.reverse();
+                    }
+
+                    // Intenta rotar si no hay colisión
+                    if (!this.collision(0, 0, rotatedShape)) {
+                        this.shape = rotatedShape;
+                        return true;
+                    }
+                    // Implementación de "Wall Kick" (desplazamiento para evitar colisiones al rotar)
                     const kicks = [[0, 0], [-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]];
                     for (let i = 0; i < kicks.length; i++) {
                         const [dx, dy] = kicks[i];
-                        if (!this.collision(dx, dy, rotatedShape)) { this.x += dx; this.y += dy; this.shape = rotatedShape; return true; }
+                        if (!this.collision(dx, dy, rotatedShape)) {
+                            this.x += dx;
+                            this.y += dy;
+                            this.shape = rotatedShape;
+                            return true;
+                        }
                     }
-                    return false;
+                    return false; // No se pudo rotar
                 }
+
+                // Verifica si la pieza colisiona con los límites del tablero o con otras piezas
                 collision(dx, dy, newShape) {
                     for (let r = 0; r < newShape.length; r++) {
                         for (let c = 0; c < newShape[r].length; c++) {
                             if (newShape[r][c] > 0) {
-                                let newX = this.x + c + dx; let newY = this.y + r + dy;
-                                if (newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && board[newY][newX] !== 'empty')) { return true; }
+                                let newX = this.x + c + dx;
+                                let newY = this.y + r + dy;
+
+                                // Comprueba colisiones con los límites del tablero o piezas existentes
+                                if (newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && board[newY][newX] !== 'empty')) {
+                                    return true;
+                                }
                             }
-                        });
-                    });
-                    return false;
+                        }
+                    }
+                    return false; // No hay colisión
                 }
+
+                // Fija la pieza al tablero cuando choca con algo
                 lock() {
                     this.shape.forEach((row, r) => {
                         row.forEach((value, c) => {
                             if (value > 0) {
-                                let boardX = this.x + c; let boardY = this.y + r;
+                                let boardX = this.x + c;
+                                let boardY = this.y + r;
+                                // Si la pieza se bloquea por encima del tablero, es Game Over
                                 if (boardY < 0) {
-                                    gameOver = true; gameMessage.textContent = '¡Game Over!';
-                                    gameMessage.classList.remove('hidden'); startButton.textContent = "Reiniciar Juego";
-                                    startButton.classList.remove('hidden'); pauseButton.classList.add('hidden');
-                                    clearInterval(gameLoopId); return;
+                                    gameOver = true;
+                                    gameMessage.textContent = '¡Game Over!';
+                                    gameMessage.classList.remove('hidden');
+                                    startButton.textContent = "Reiniciar Juego"; // Cambia el texto del botón
+                                    startButton.classList.remove('hidden');
+                                    pauseButton.classList.add('hidden');
+                                    cancelAnimationFrame(gameLoopId); // Detiene el ciclo de juego
+                                    return;
                                 }
-                                board[boardY][boardX] = this.color;
+                                board[boardY][boardX] = this.color; // Asigna el color de la pieza a la celda del tablero
                             }
                         });
                     });
-                    this.clearLines(); this.generateNewPiece();
+                    this.clearLines(); // Intenta limpiar líneas
+                    this.generateNewPiece(); // Genera una nueva pieza
                 }
+
+                // Elimina las líneas completas del tablero
                 clearLines() {
                     let linesCleared = 0;
                     for (let r = ROWS - 1; r >= 0; r--) {
+                        // Si la línea está completa
                         if (board[r].every(cell => cell !== 'empty')) {
-                            linesCleared++; board.splice(r, 1); board.unshift(Array(COLS).fill('empty')); r++;
+                            linesCleared++;
+                            board.splice(r, 1); // Elimina la línea
+                            board.unshift(Array(COLS).fill('empty')); // Añade una nueva línea vacía en la parte superior
+                            r++; // Vuelve a comprobar la misma fila, ya que las de arriba se han movido hacia abajo
                         }
                     }
                     if (linesCleared > 0) {
-                        score += linesCleared * 100 * level; scoreDisplay.textContent = score; linesClearedTotal += linesCleared;
+                        score += linesCleared * 100 * level; // Aumenta la puntuación
+                        scoreDisplay.textContent = score;
+                        linesClearedTotal += linesCleared;
+
+                        // Lógica para subir de nivel
                         if (level < 10 && score >= nextLevelScoreThreshold) {
-                            level++; levelDisplay.textContent = level; nextLevelScoreThreshold += 1000;
-                            currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 75));
-                            isPaused = true; pauseButton.textContent = "Reanudar"; cancelAnimationFrame(gameLoopId);
-                            initBoard(); drawBoard();
-                            COLORS = COLOR_PALETTES[(level -1) % COLOR_PALETTES.length]; // Change color palette
-                            displayLevelUpMessage();
+                            level++;
+                            levelDisplay.textContent = level;
+                            nextLevelScoreThreshold += 1000; // Aumenta el umbral para el siguiente nivel
+                            currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 75)); // Acelera la caída
+                            isPaused = true; // Pausa el juego temporalmente para mostrar el mensaje de nivel
+                            pauseButton.textContent = "Reanudar";
+                            cancelAnimationFrame(gameLoopId); // Detiene la animación actual
+                            initBoard(); // Reinicia el tablero (para limpiar cualquier "fantasma" de piezas)
+                            drawBoard(); // Redibuja el tablero
+                            COLORS = COLOR_PALETTES[(level -1) % COLOR_PALETTES.length]; // Cambia la paleta de colores
+                            displayLevelUpMessage(); // Muestra un mensaje de subida de nivel
                         }
-                        if (linesCleared === 2) { displayComboMessage('¡Doble!'); } else if (linesCleared === 3) { displayComboMessage('¡Triple!'); } else if (linesCleared === 4) { displayComboMessage('¡Tetris!'); }
+
+                        // Muestra mensajes de combo
+                        if (linesCleared === 2) { displayComboMessage('¡Doble!'); }
+                        else if (linesCleared === 3) { displayComboMessage('¡Triple!'); }
+                        else if (linesCleared === 4) { displayComboMessage('¡Tetris!'); }
                     }
                 }
+
+                // Genera la siguiente pieza y la pieza actual
                 generateNewPiece() {
-                    currentPiece = nextPiece; nextPiece = this.randomPiece(); this.drawNextPiece();
+                    currentPiece = nextPiece; // La siguiente pieza se convierte en la actual
+                    nextPiece = this.randomPiece(); // Genera una nueva siguiente pieza
+                    this.drawNextPiece(); // Dibuja la siguiente pieza en su área de visualización
+
+                    // Comprueba si la nueva pieza colisiona al aparecer (Game Over inmediato)
                     if (currentPiece.collision(0, 0, currentPiece.shape)) {
-                        gameOver = true; gameMessage.textContent = '¡Game Over!';
-                        gameMessage.classList.remove('hidden'); startButton.textContent = "Reiniciar Juego";
-                        startButton.classList.remove('hidden'); pauseButton.classList.add('hidden');
-                        clearInterval(gameLoopId);
+                        gameOver = true;
+                        gameMessage.textContent = '¡Game Over!';
+                        gameMessage.classList.remove('hidden');
+                        startButton.textContent = "Reiniciar Juego";
+                        startButton.classList.remove('hidden');
+                        pauseButton.classList.add('hidden');
+                        cancelAnimationFrame(gameLoopId); // Detiene el ciclo de juego
                     }
                 }
+
+                // Crea una pieza de Tetris aleatoria
                 randomPiece() {
                     const types = Object.keys(TETROMINO_SHAPES);
                     const randType = types[Math.floor(Math.random() * types.length)];
                     return new Piece(randType);
                 }
+
+                // Dibuja la siguiente pieza en su contenedor
                 drawNextPiece() {
-                    nextPieceDisplay.innerHTML = ''; const tempCanvas = document.createElement('canvas');
+                    nextPieceDisplay.innerHTML = ''; // Limpia el contenedor
+                    const tempCanvas = document.createElement('canvas'); // Crea un canvas temporal
                     const tempCtx = tempCanvas.getContext('2d');
-                    tempCanvas.width = 4 * BLOCK_SIZE; tempCanvas.height = 4 * BLOCK_SIZE;
-                    tempCanvas.style.display = 'inline-block'; tempCanvas.style.verticalAlign = 'middle';
-                    tempCanvas.style.marginLeft = '10px'; tempCanvas.style.backgroundColor = '#e0f4f8';
-                    tempCanvas.style.borderRadius = '8px'; tempCanvas.style.border = '2px solid #a7d9f7';
+                    tempCanvas.width = 4 * BLOCK_SIZE; // Tamaño para la vista previa
+                    tempCanvas.height = 4 * BLOCK_SIZE;
+                    tempCanvas.style.display = 'inline-block';
+                    tempCanvas.style.verticalAlign = 'middle';
+                    tempCanvas.style.marginLeft = '10px';
+                    tempCanvas.style.backgroundColor = '#e0f4f8';
+                    tempCanvas.style.borderRadius = '8px';
+                    tempCanvas.style.border = '2px solid #a7d9f7';
 
                     nextPiece.shape.forEach((row, r) => {
                         row.forEach((value, c) => {
                             if (value > 0) {
                                 tempCtx.fillStyle = nextPiece.color;
                                 tempCtx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                                tempCtx.strokeStyle = '#fff'; tempCtx.lineWidth = 1;
+                                tempCtx.strokeStyle = '#fff';
+                                tempCtx.lineWidth = 1;
                                 tempCtx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                             }
                         });
@@ -672,551 +805,1204 @@
                 }
             }
 
-            function initBoard() { for (let r = 0; r < ROWS; r++) { board[r] = Array(COLS).fill('empty'); }}
+            // Inicializa el tablero con celdas vacías
+            function initBoard() {
+                for (let r = 0; r < ROWS; r++) {
+                    board[r] = Array(COLS).fill('empty');
+                }
+            }
+
+            // Dibuja el tablero de juego (piezas fijas)
             function drawBoard() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpia el canvas
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
                         if (board[r][c] !== 'empty') {
                             ctx.fillStyle = board[r][c];
                             ctx.fillRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                            ctx.strokeStyle = '#fff'; ctx.lineWidth = 1;
+                            ctx.strokeStyle = '#fff';
+                            ctx.lineWidth = 1;
                             ctx.strokeRect(c * BLOCK_SIZE, r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                         }
                     }
                 }
             }
+
+            // Muestra un mensaje de combo (Doble, Triple, Tetris)
             function displayComboMessage(message) {
-                comboMessageElement.textContent = message; comboMessageElement.classList.add('show');
-                setTimeout(() => { comboMessageElement.classList.remove('show'); }, 700);
+                comboMessageElement.textContent = message;
+                comboMessageElement.classList.add('show');
+                setTimeout(() => {
+                    comboMessageElement.classList.remove('show');
+                }, 700); // El mensaje desaparece después de 0.7 segundos
             }
+
+            // Chistes para cuando el jugador sube de nivel
             const levelUpJokes = [
-                "¿Qué le dice un Tetris a otro? ¡Deja de apilarte, que me ahogo!", "¿Por qué el Tetris nunca gana en un debate? ¡Siempre se queda bloqueado!",
-                "Un Tetris entra a un bar... y le dicen: 'Lo siento, aquí no se permiten piezas sueltas'.", "¿Cuál es el colmo de un Tetris? ¡Que se le caigan todas las líneas!",
-                "Mi vida es como un Tetris: si todo encaja, desaparece.", "¿Qué hace un Tetris en el gimnasio? ¡Forma cubos!",
+                "¿Qué le dice un Tetris a otro? ¡Deja de apilarte, que me ahogo!",
+                "¿Por qué el Tetris nunca gana en un debate? ¡Siempre se queda bloqueado!",
+                "Un Tetris entra a un bar... y le dicen: 'Lo siento, aquí no se permiten piezas sueltas'.",
+                "¿Cuál es el colmo de un Tetris? ¡Que se le caigan todas las líneas!",
+                "Mi vida es como un Tetris: si todo encaja, desaparece.",
+                "¿Qué hace un Tetris en el gimnasio? ¡Forma cubos!",
                 "¿Por qué los Tetris son buenos en matemáticas? ¡Porque siempre están calculando ángulos!",
                 "Mi psicólogo me dijo que mi ansiedad se debía a un juego de Tetris mal resuelto en mi pasado.",
-                "¿Qué es un Tetris bailando? ¡Un baile de bloques!", "¡Felicidades! Has superado otro nivel, ahora el juego se pone más... en línea.",
-                "¿Por qué el lápiz se deprimió? Porque estaba muy atilado.", "¿Qué le dice una pared a otra pared? ¡Nos vemos en la esquina!",
-                "¿Qué hace una computadora en la playa? Busca un mouse playero.", "¿Cómo se llama el hermano mayor de un tomate? ¡Tomatón!",
+                "¿Qué es un Tetris bailando? ¡Un baile de bloques!",
+                "¡Felicidades! Has superado otro nivel, ahora el juego se pone más... en línea.",
+                "¿Por qué el lápiz se deprimió? Porque estaba muy atilado.",
+                "¿Qué le dice una pared a otra pared? ¡Nos vemos en la esquina!",
+                "¿Qué hace una computadora en la playa? Busca un mouse playero.",
+                "¿Cómo se llama el hermano mayor de un tomate? ¡Tomatón!",
                 "¿Por qué el perro no puede jugar a las cartas? Porque siempre se sienta sobre las barajas."
             ];
+
+            // Muestra un mensaje y un chiste al subir de nivel
             function displayLevelUpMessage() {
                 const randomIndex = Math.floor(Math.random() * levelUpJokes.length);
                 levelUpMessageElement.innerHTML = `¡Nivel ${level}! <br>` + levelUpJokes[randomIndex];
                 levelUpMessageElement.classList.add('show');
             }
 
+            // Bucle principal del juego
             function gameLoop(currentTime) {
-                gameLoopId = requestAnimationFrame(gameLoop);
-                if (gameOver || isPaused || !gameStarted) return;
+                gameLoopId = requestAnimationFrame(gameLoop); // Solicita el siguiente fotograma de animación
+                if (gameOver || isPaused || !gameStarted) return; // Si el juego está terminado, pausado o no ha comenzado, no hacer nada
+
+                // Controla la caída de la pieza según el intervalo de tiempo
                 if (currentTime - lastUpdateTime > currentFallInterval) {
-                    if (!currentPiece.move(0, 1)) { currentPiece.lock(); }
-                    lastUpdateTime = currentTime;
+                    if (!currentPiece.move(0, 1)) { // Intenta mover la pieza hacia abajo
+                        currentPiece.lock(); // Si no puede, la bloquea
+                    }
+                    lastUpdateTime = currentTime; // Actualiza el tiempo de la última caída
                 }
-                drawBoard(); currentPiece.draw();
+
+                drawBoard(); // Dibuja el tablero
+                currentPiece.draw(); // Dibuja la pieza que está cayendo
             }
 
+            // Inicia o reinicia el juego
             function startGame() {
-                initBoard(); score = 0; level = 1; linesClearedTotal = 0;
-                currentFallInterval = BASE_FALL_INTERVAL; nextLevelScoreThreshold = 500;
-                isPaused = false; gameOver = false; gameStarted = true;
+                initBoard(); // Inicializa el tablero
+                score = 0; level = 1; linesClearedTotal = 0; // Reinicia puntuación, nivel y líneas
+                currentFallInterval = BASE_FALL_INTERVAL; nextLevelScoreThreshold = 500; // Reinicia intervalos y umbrales
+                isPaused = false; gameOver = false; gameStarted = true; // Reinicia estados del juego
 
-                scoreDisplay.textContent = score; levelDisplay.textContent = level;
-                gameMessage.classList.add('hidden'); comboMessageElement.classList.remove('show'); levelUpMessageElement.classList.remove('show');
+                scoreDisplay.textContent = score; // Actualiza UI
+                levelDisplay.textContent = level;
+                gameMessage.classList.add('hidden'); // Oculta mensajes
+                comboMessageElement.classList.remove('show');
+                levelUpMessageElement.classList.remove('show');
 
-                startButton.classList.add('hidden'); pauseButton.classList.remove('hidden'); pauseButton.textContent = "Pausar";
-                COLORS = COLOR_PALETTES[0]; // Reset palette on new game start
+                startButton.classList.add('hidden'); // Oculta el botón de inicio
+                pauseButton.classList.remove('hidden'); // Muestra el botón de pausa
+                pauseButton.textContent = "Pausar"; // Asegura que el texto del botón sea "Pausar"
+                COLORS = COLOR_PALETTES[0]; // Restablecer paleta al iniciar nuevo juego
 
+                // Genera la primera pieza y la siguiente
                 currentPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
                 nextPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
-                currentPiece.drawNextPiece(); lastUpdateTime = performance.now();
-                if (gameLoopId) { cancelAnimationFrame(gameLoopId); }
-                gameLoopId = requestAnimationFrame(gameLoop);
+                currentPiece.drawNextPiece(); // Dibuja la vista previa de la siguiente pieza
+                lastUpdateTime = performance.now(); // Establece el tiempo de inicio para el bucle de caída
+
+                if (gameLoopId) { cancelAnimationFrame(gameLoopId); } // Cancela cualquier bucle anterior
+                gameLoopId = requestAnimationFrame(gameLoop); // Inicia el bucle de juego
             }
 
+            // Manejo de eventos de teclado
             document.addEventListener('keydown', e => {
-                if (!gameStarted) return; if (gameOver) { if (e.key === 'Enter') { startGame(); } return; }
-                if (isPaused && e.key !== 'p' && e.key !== 'P') return;
-                switch (e.key) {
-                    case 'ArrowLeft': currentPiece.move(-1, 0); break; case 'ArrowRight': currentPiece.move(1, 0); break;
-                    case 'ArrowDown': currentPiece.move(0, 1); break; case 'ArrowUp': currentPiece.rotate(); break;
-                    case ' ': while (currentPiece.move(0, 1)); currentPiece.lock(); break;
-                    case 'p': case 'P': togglePause(); break;
+                if (!gameStarted) return; // No hace nada si el juego no ha comenzado
+                if (gameOver) {
+                    if (e.key === 'Enter') { startGame(); } // Reinicia el juego si es Game Over y se presiona Enter
+                    return;
                 }
-                if (!isPaused) { drawBoard(); currentPiece.draw(); }
+                if (isPaused && e.key !== 'p' && e.key !== 'P') return; // Solo permite pausar/reanudar si está pausado
+
+                switch (e.key) {
+                    case 'ArrowLeft': currentPiece.move(-1, 0); break; // Mover a la izquierda
+                    case 'ArrowRight': currentPiece.move(1, 0); break; // Mover a la derecha
+                    case 'ArrowDown': currentPiece.move(0, 1); break; // Mover hacia abajo (caída suave)
+                    case 'ArrowUp': currentPiece.rotate(); break; // Rotar
+                    case ' ': while (currentPiece.move(0, 1)); currentPiece.lock(); break; // Caída instantánea (hard drop)
+                    case 'p': case 'P': togglePause(); break; // Pausar/Reanudar
+                }
+                if (!isPaused) {
+                    drawBoard(); // Redibuja el tablero después del movimiento
+                    currentPiece.draw(); // Redibuja la pieza
+                }
             });
 
-            let touchStartX = 0; let touchStartY = 0; const tapThreshold = 8; const swipeThreshold = 20; const hardDropSwipeThreshold = 70;
+            // Variables para el control táctil
+            let touchStartX = 0;
+            let touchStartY = 0;
+            const tapThreshold = 8; // Umbral para reconocer un toque
+            const swipeThreshold = 20; // Umbral para reconocer un deslizamiento
+            const hardDropSwipeThreshold = 70; // Umbral para reconocer un deslizamiento largo para hard drop
+
+            // Manejo de eventos táctiles
             canvas.addEventListener('touchstart', e => {
-                e.preventDefault(); if (!gameStarted || gameOver || isPaused) return;
-                touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+                e.preventDefault(); // Evita el scroll predeterminado del navegador
+                if (!gameStarted || gameOver || isPaused) return;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
             });
-            canvas.addEventListener('touchmove', e => { e.preventDefault(); });
+
+            canvas.addEventListener('touchmove', e => { e.preventDefault(); }); // Evita el scroll durante el movimiento táctil
+
             canvas.addEventListener('touchend', e => {
                 if (!gameStarted || gameOver || isPaused) return;
-                const touchEndX = e.changedTouches[0].clientX; const touchEndY = e.changedTouches[0].clientY;
-                const deltaX = touchEndX - touchStartX; const deltaY = touchEndY - touchStartY;
+                const touchEndX = e.changedTouches[0].clientX;
+                const touchEndY = e.changedTouches[0].clientY;
+                const deltaX = touchEndX - touchStartX;
+                const deltaY = touchEndY - touchStartY;
                 const isTap = Math.abs(deltaX) < tapThreshold && Math.abs(deltaY) < tapThreshold;
 
-                if (isTap) { currentPiece.rotate(); } else {
+                if (isTap) {
+                    currentPiece.rotate(); // Un toque simple rota la pieza
+                } else {
                     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
-                        if (deltaX < 0) { currentPiece.move(-1, 0); } else { currentPiece.move(1, 0); }
+                        // Deslizamiento horizontal
+                        if (deltaX < 0) { currentPiece.move(-1, 0); } // Deslizar izquierda
+                        else { currentPiece.move(1, 0); } // Deslizar derecha
                     } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > swipeThreshold) {
+                        // Deslizamiento vertical
                         if (deltaY > 0) {
-                            if (Math.abs(deltaY) > hardDropSwipeThreshold) { while (currentPiece.move(0, 1)); currentPiece.lock(); }
-                            else { currentPiece.move(0, 1); }
+                            if (Math.abs(deltaY) > hardDropSwipeThreshold) {
+                                while (currentPiece.move(0, 1)); // Caída instantánea si el deslizamiento es largo
+                                currentPiece.lock();
+                            } else {
+                                currentPiece.move(0, 1); // Caída suave si el deslizamiento es corto
+                            }
                         }
                     }
                 }
-                drawBoard(); currentPiece.draw();
+                drawBoard(); // Redibuja el tablero
+                currentPiece.draw(); // Redibuja la pieza
             });
 
+            // Alterna el estado de pausa del juego
             function togglePause() {
-                if (!gameStarted || gameOver) return;
-                isPaused = !isPaused;
+                if (!gameStarted || gameOver) return; // No se puede pausar si el juego no ha comenzado o ha terminado
+                isPaused = !isPaused; // Invierte el estado de pausa
                 if (isPaused) {
-                    pauseButton.textContent = "Reanudar"; gameMessage.textContent = '¡Juego Pausado!';
-                    gameMessage.classList.remove('hidden'); cancelAnimationFrame(gameLoopId);
+                    pauseButton.textContent = "Reanudar"; // Cambia el texto del botón
+                    gameMessage.textContent = '¡Juego Pausado!'; // Muestra mensaje de pausa
+                    gameMessage.classList.remove('hidden');
+                    cancelAnimationFrame(gameLoopId); // Detiene el bucle de animación
                 } else {
-                    pauseButton.textContent = "Pausar"; gameMessage.classList.add('hidden');
-                    levelUpMessageElement.classList.remove('show'); lastUpdateTime = performance.now();
-                    gameLoop(performance.now());
+                    pauseButton.textContent = "Pausar"; // Cambia el texto del botón
+                    gameMessage.classList.add('hidden'); // Oculta el mensaje de pausa
+                    levelUpMessageElement.classList.remove('show'); // Oculta el mensaje de nivel (si estaba visible)
+                    lastUpdateTime = performance.now(); // Restablece el tiempo para la caída correcta
+                    gameLoop(performance.now()); // Reanuda el bucle de juego
                 }
             }
+
+            // Event listener para el botón de pausa
             pauseButton.addEventListener('click', togglePause);
 
+            // Event listener para el botón de inicio/reinicio
             startButton.addEventListener('click', () => {
-                if (gameOver || !gameStarted) { startGame(); }
-                else if (isPaused) { togglePause(); }
+                if (gameOver || !gameStarted) {
+                    startGame(); // Inicia un nuevo juego si es Game Over o no ha comenzado
+                } else if (isPaused) {
+                    togglePause(); // Reanuda el juego si está pausado
+                }
             });
 
-            return { startGame: startGame, togglePause: togglePause, isPaused: () => isPaused, gameOver: () => gameOver, gameStarted: () => gameStarted };
+            // Funciones públicas del módulo para acceder desde fuera
+            return {
+                startGame: startGame,
+                togglePause: togglePause,
+                isPaused: () => isPaused,
+                gameOver: () => gameOver,
+                gameStarted: () => gameStarted
+            };
         })();
 
 
-        // --- CRUCIGRAMA GAME LOGIC (Encapsulated) ---
-        window.crosswordGame = (() => {
-            const crosswordGridElement = document.getElementById('crossword-grid');
-            const cluesAcrossElement = document.getElementById('crossword-clues-across');
-            const cluesDownElement = document.getElementById('crossword-clues-down');
-            const crosswordMessageElement = document.getElementById('crossword-message');
-            const checkButton = document.getElementById('crossword-check-button');
-            const resetButton = document.getElementById('crossword-reset-button');
-            const currentClueInfoElement = document.getElementById('crossword-current-clue-info');
-            const difficultyButtons = document.querySelectorAll('.difficulty-buttons .game-button');
-            const crosswordGameArea = document.getElementById('crossword-game-area');
-            const levelCompleteMessageDiv = document.getElementById('level-complete-message');
-            const levelCompleteText = document.getElementById('level-complete-text');
-            const nextCrosswordButton = document.getElementById('next-crossword-button');
+        // --- LÓGICA DEL JUEGO DE CRUCIGRAMA (NUEVA IMPLEMENTACIÓN) ---
+        // Core variables and constants
+        let _answers = [];
+        let _vword = "";
+        let _refs = [];
+        let numberOfInputs = 0; // Total number of fillable inputs
+        let originalColors = {};
 
-            let currentDifficulty = 'easy'; // Default difficulty
-            let currentPuzzleIndex = 0;
+        // DOM elements
+        const CPUZZLE_CONTAINER = document.getElementById('cpuzzle');
+        const REFERENCES_CONTAINER = document.getElementById('references');
+        
+        const levelSelectionDiv = document.getElementById('level-selection');
+        const gameAreaDiv = document.getElementById('game-area');
+        const crosswordTitle = document.getElementById('crossword-title');
+        const scoreDisplay = document.getElementById('score-display');
+        const crosswordCounter = document.getElementById('crossword-counter');
+        const nextCrosswordBtn = document.getElementById('next-crossword-btn');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const revealLetterBtn = document.getElementById('reveal-letter-btn'); // Renamed from showAnswersBtn
+        const menuBtn = document.getElementById('menu-btn');
+        const configBtn = document.getElementById('config-btn');
+        const progressBar = document.querySelector('.progress-bar');
+        const messageDisplay = document.getElementById('message-display');
+        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
 
-            // Define crossword puzzles for each difficulty
-            const crosswordPuzzles = {
-                easy: [
-                    {
-                        name: "Crucigrama Fácil 1",
-                        gridSize: 6,
-                        clues: [
-                            { word: "SOL", clue: "Astro rey.", start: [0, 0], direction: "across" },
-                            { word: "LUNA", clue: "Satélite natural de la Tierra.", start: [0, 0], direction: "down" },
-                            { word: "MAR", clue: "Gran extensión de agua salada.", start: [2, 1], direction: "across" },
-                            { word: "ARBOL", clue: "Planta de tronco leñoso.", start: [0, 2], direction: "down" },
-                            { word: "PAZ", clue: "Estado de tranquilidad o sosiego.", start: [3, 4], direction: "across" }
-                        ],
-                        levelCompleteMessage: "¡Excelente! Has completado el crucigrama fácil. Recuerda: 'El conocimiento es poder'. ¡Sigue adelante!",
-                    },
-                    {
-                        name: "Crucigrama Fácil 2",
-                        gridSize: 6,
-                        clues: [
-                            { word: "ROJO", clue: "Color de la sangre.", start: [0, 0], direction: "across" },
-                            { word: "OSO", clue: "Animal grande y peludo.", start: [0, 0], direction: "down" },
-                            { word: "VIDA", clue: "Existencia de los seres.", start: [2, 1], direction: "across" },
-                            { word: "GATO", clue: "Animal doméstico que maúlla.", start: [0, 3], direction: "down" }
-                        ],
-                        levelCompleteMessage: "¡Muy bien! Has superado otro reto. 'La paciencia es una virtud, especialmente en los crucigramas'.",
-                    }
-                ],
-                medium: [
-                    {
-                        name: "Crucigrama Medio 1",
-                        gridSize: 8,
-                        clues: [
-                            { word: "CULTURA", clue: "Conjunto de conocimientos, ideas, tradiciones y costumbres que caracterizan a un pueblo o clase social.", start: [0, 0], direction: "across" },
-                            { word: "TIEMPO", clue: "Magnitud física que permite ordenar la secuencia de los sucesos.", start: [0, 0], direction: "down" },
-                            { word: "ARTE", clue: "Actividad en la que el ser humano recrea, con fines estéticos, un aspecto de la realidad o un sentimiento.", start: [2, 2], direction: "across" },
-                            { word: "HISTORIA", clue: "Ciencia que estudia el pasado.", start: [0, 6], direction: "down" },
-                            { word: "LIBRO", clue: "Conjunto de hojas de papel, pergamino, vitela, etc.", start: [4, 4], direction: "across" },
-                            { word: "PAZ", clue: "Estado de tranquilidad o sosiego.", start: [1, 5], direction: "down" },
-                            { word: "CIENCIA", clue: "Rama del saber humano constituida por el conjunto de conocimientos objetivos y verificables sobre una materia determinada.", start: [6, 0], direction: "across" },
-                            { word: "MUSICA", clue: "Arte de combinar los sonidos.", start: [3, 0], direction: "down" }
-                        ],
-                        levelCompleteMessage: "¡Impresionante! Has dominado el nivel medio. 'La vida es como una bicicleta: para mantener el equilibrio, tienes que seguir avanzando.'",
-                    }
-                ],
-                hard: [
-                    {
-                        name: "Crucigrama Difícil 1",
-                        gridSize: 10,
-                        clues: [
-                            { word: "FILOSOFIA", clue: "Estudio de una variedad de problemas fundamentales acerca de cuestiones como la existencia, el conocimiento, la verdad, la moral, la belleza, la mente y el lenguaje.", start: [0, 0], direction: "across" },
-                            { word: "UNIVERSO", clue: "Conjunto de todo lo que existe, la materia, la energía, el espacio y el tiempo.", start: [0, 0], direction: "down" },
-                            { word: "GENETICA", clue: "Rama de la biología que estudia la herencia.", start: [2, 5], direction: "across" },
-                            { word: "CUANTICA", clue: "Teoría física basada en la utilización del concepto de unidad cuántica para describir las propiedades dinámicas de las partículas subatómicas y las interacciones de la radiación y la materia.", start: [0, 9], direction: "down" },
-                            { word: "NEUROCIENCIA", clue: "Estudio científico del sistema nervioso.", start: [5, 2], direction: "across" },
-                            { word: "SIMBIOSIS", clue: "Asociación íntima de organismos de especies diferentes para beneficiarse mutuamente en su desarrollo vital.", start: [1, 7], direction: "down" },
-                            { word: "CRIPTO", clue: "Prefijo que significa 'oculto' o 'secreto'.", start: [8, 0], direction: "across" },
-                            { word: "ALGORITMO", clue: "Conjunto ordenado y finito de operaciones que permite hallar la solución de un problema.", start: [4, 0], direction: "down" }
-                        ],
-                        levelCompleteMessage: "¡Increíble! Has conquistado el crucigrama más difícil. 'Cada desafío superado es una lección aprendida. No dejes de aprender.'",
-                    }
-                ]
-            };
+        // Game state variables
+        let currentLevel = '';
+        let currentCrosswordIndex = 0;
+        let currentCrosswordsForLevel = [];
+        let totalScore = 0; // Overall game score across all puzzles
 
+        // Timeout for message display
+        let messageTimeout;
 
-            function assignClueNumbersAndPrepareGridData(cluesForPuzzle, currentGridSize) {
-                const startCellMap = {}; // Key: "r-c", Value: { acrossClue: data, downClue: data, number: assignedNum }
-                let clueNumberCounter = 1;
+        // Data structure for crosswords
+        const crucigramas = {
+            "facil": {
+                // Ancho: 10, Alto: 10, Palabras de 5 a 10 letras
+                "Crucigrama 1 F": {
+                    "ancho": 10, "alto": 10,
+                    "vword": "CULTURA", // 7 letters
+                    "answers": [
+                        "ARTE",         // C
+                        "MUSICA",       // U
+                        "LIBRO",        // L
+                        "TRADICION",    // T
+                        "IDIOMA",       // U
+                        "RITO",         // R
+                        "SABER"         // A
+                    ],
+                    "refs": [
+                        "Expresión de la creatividad humana",
+                        "Arte de los sonidos organizados",
+                        "Conjunto de hojas escritas",
+                        "Costumbre transmitida",
+                        "Sistema de comunicación verbal",
+                        "Ceremonia o costumbre",
+                        "Conocimiento profundo"
+                    ]
+                },
+                "Crucigrama 2 F": {
+                    "ancho": 10, "alto": 10,
+                    "vword": "TECNICO", // 7 letters
+                    "answers": [
+                        "REDES",        // T
+                        "EQUIPO",       // E
+                        "SOFTWARE",     // C
+                        "ORDENADOR",    // N
+                        "INTERNET",     // I
+                        "CODIGO",       // C
+                        "OPERAR"        // O
+                    ],
+                    "refs": [
+                        "Conjunto de conexiones",
+                        "Conjunto de aparatos",
+                        "Programas informáticos",
+                        "Máquina para procesar datos",
+                        "Red global de comunicación",
+                        "Conjunto de instrucciones",
+                        "Manejar o funcionar"
+                    ]
+                },
+                "Crucigrama 3 F": {
+                    "ancho": 10, "alto": 10,
+                    "vword": "MUSICA", // 6 letters
+                    "answers": [
+                        "RITMO",        // M
+                        "NOTA",         // U
+                        "CANTO",        // S
+                        "INSTRUMENTO",  // I
+                        "PIANO",        // C
+                        "MELODIA"       // A
+                    ],
+                    "refs": [
+                        "Patrón de sonidos",
+                        "Signo de sonido",
+                        "Acción de cantar",
+                        "Objeto para producir sonidos",
+                        "Instrumento de teclado",
+                        "Serie de sonidos agradables"
+                    ]
+                },
+                "Crucigrama 4 F": {
+                    "ancho": 10, "alto": 10,
+                    "vword": "SALUD", // 5 letters
+                    "answers": [
+                        "BIENESTAR",    // S
+                        "MEDICO",       // A
+                        "DEPORTE",      // L
+                        "DIETA",        // U
+                        "MENTE"         // D
+                    ],
+                    "refs": [
+                        "Estado de sentirse bien",
+                        "Profesional de la medicina",
+                        "Actividad física",
+                        "Régimen alimenticio",
+                        "Facultad de pensar"
+                    ]
+                },
+                "Crucigrama 5 F": {
+                    "ancho": 10, "alto": 10,
+                    "vword": "VIAJE", // 5 letters
+                    "answers": [
+                        "AVION",        // V
+                        "ISLA",         // I
+                        "AVENTURA",     // A
+                        "RUMBO",        // J
+                        "DESTINO"       // E
+                    ],
+                    "refs": [
+                        "Aeronave",
+                        "Tierra rodeada de agua",
+                        "Experiencia emocionante",
+                        "Dirección que se toma",
+                        "Lugar al que se llega"
+                    ]
+                }
+            },
+            "medio": {
+                // Ancho: 20, Alto: 20, Palabras hasta 15 letras
+                "Crucigrama 1 M": {
+                    "ancho": 20, "alto": 20,
+                    "vword": "HISTORIA", // 8 letters
+                    "answers": [
+                        "ANTIGUEDAD",       // H
+                        "DESCUBRIMIENTO",   // I
+                        "SUCESO",           // S
+                        "TIEMPO",           // T
+                        "ORIGEN",           // O
+                        "REVOLUCION",       // R
+                        "INVESTIGACION",    // I
+                        "ARQUEOLOGIA"       // A
+                    ],
+                    "refs": [
+                        "Periodo muy remoto",
+                        "Hallazgo de algo nuevo",
+                        "Acontecimiento o hecho",
+                        "Magnitud de duración",
+                        "Principio o comienzo",
+                        "Cambio profundo y rápido",
+                        "Búsqueda de conocimiento",
+                        "Estudio de las civilizaciones antiguas"
+                    ]
+                },
+                "Crucigrama 2 M": {
+                    "ancho": 20, "alto": 20,
+                    "vword": "BIOLOGIA", // 8 letters
+                    "answers": [
+                        "CELULA",           // B
+                        "ORGANISMO",        // I
+                        "DIVERSIDAD",       // O
+                        "GENETICA",         // L
+                        "ECOLOGIA",         // O
+                        "PLANTAS",          // G
+                        "ANIMALES",         // I
+                        "ADAPTACION"        // A
+                    ],
+                    "refs": [
+                        "Unidad básica de la vida",
+                        "Ser vivo complejo",
+                        "Variedad de especies",
+                        "Estudio de la herencia",
+                        "Estudio de los ecosistemas",
+                        "Seres vivos fotosintéticos",
+                        "Seres vivos que se mueven",
+                        "Ajuste al ambiente"
+                    ]
+                },
+                "Crucigrama 3 M": {
+                    "ancho": 20, "alto": 20,
+                    "vword": "ECONOMIA", // 8 letters
+                    "answers": [
+                        "FINANZAS",         // E
+                        "COMERCIO",         // C
+                        "PRODUCCION",       // O
+                        "MERCADO",          // N
+                        "INDUSTRIA",        // O
+                        "RECURSOS",         // M
+                        "AHORRO",           // I
+                        "EMPRESA"           // A
+                    ],
+                    "refs": [
+                        "Gestión de dinero",
+                        "Intercambio de bienes",
+                        "Elaboración de productos",
+                        "Lugar de compra y venta",
+                        "Conjunto de fábricas",
+                        "Bienes disponibles",
+                        "Guardar dinero",
+                        "Organización con fines de lucro"
+                    ]
+                },
+                "Crucigrama 4 M": {
+                    "ancho": 20, "alto": 20,
+                    "vword": "GEOGRAFIA", // 9 letters
+                    "answers": [
+                        "MAPA",             // G
+                        "RELIEVE",          // E
+                        "OCEANOS",          // O
+                        "CLIMA",            // G
+                        "REGION",           // R
+                        "PAISAJE",          // A
+                        "FRONTERA",         // F
+                        "POBLACION",        // I
+                        "TERRITORIO"        // A
+                    ],
+                    "refs": [
+                        "Representación gráfica de la tierra",
+                        "Formas de la superficie terrestre",
+                        "Grandes masas de agua salada",
+                        "Condiciones atmosféricas",
+                        "Zona delimitada",
+                        "Vista del terreno",
+                        "Límite entre países",
+                        "Conjunto de habitantes",
+                        "Extensión de tierra"
+                    ]
+                },
+                "Crucigrama 5 M": {
+                    "ancho": 20, "alto": 20,
+                    "vword": "FILOSOFIA", // 9 letters
+                    "answers": [
+                        "PENSAMIENTO",      // F
+                        "LOGICA",           // I
+                        "RAZON",            // L
+                        "CONOCIMIENTO",     // O
+                        "SABIDURIA",        // S
+                        "ETICA",            // O
+                        "MORAL",            // F
+                        "IDEAS",            // I
+                        "VALORES"           // A
+                    ],
+                    "refs": [
+                        "Acto de pensar",
+                        "Estudio del razonamiento válido",
+                        "Capacidad de reflexionar",
+                        "Información y entendimiento",
+                        "Conocimiento profundo",
+                        "Principios del bien y el mal",
+                        "Normas de conducta",
+                        "Conceptos o representaciones",
+                        "Principios de conducta"
+                    ]
+                }
+            },
+            "dificil": {
+                // Ancho: 20, Alto: 20, Palabras más difíciles
+                "Crucigrama 1 D": {
+                    "ancho": 20, "alto": 20,
+                    "vword": "PARADIGMA", // 9 letters
+                    "answers": [
+                        "CONCEPCION",       // P
+                        "MODELO",           // A
+                        "REVOLUCION",       // R
+                        "ANALOGIA",         // A
+                        "DESARROLLO",       // D
+                        "INVESTIGACION",    // I
+                        "GLOBALIZACION",    // G
+                        "HEGEMONIA",        // M
+                        "SINTESIS"          // A
+                    ],
+                    "refs": [
+                        "Idea o modo de entender",
+                        "Ejemplo a seguir",
+                        "Cambio profundo",
+                        "Relación de semejanza",
+                        "Proceso de crecimiento o mejora",
+                        "Búsqueda sistemática de conocimiento",
+                        "Expansión a nivel mundial",
+                        "Supremacía o dominio",
+                        "Composición de un todo por la unión de sus partes"
+                    ]
+                },
+                "Crucigrama 2 D": {
+                    "ancho": 20, "alto": 20,
+                    "vword": "EPISTEME", // 8 letters
+                    "answers": [
+                        "CONOCIMIENTO",     // E
+                        "CIENCIA",          // P
+                        "RAZONAMIENTO",     // I
+                        "TEORIA",           // S
+                        "VERIFICACION",     // T
+                        "EXPLICACION",      // E
+                        "METODOLOGIA",      // M
+                        "DISCURSO"          // E
+                    ],
+                    "refs": [
+                        "Saber adquirido",
+                        "Rama del saber humano",
+                        "Proceso mental lógico",
+                        "Conjunto de hipótesis que explican un fenómeno",
+                        "Comprobación de la verdad",
+                        "Justificación o aclaración",
+                        "Estudio de los métodos",
+                        "Serie de palabras o razonamientos"
+                    ]
+                },
+                "Crucigrama 3 D": {
+                    "ancho": 20, "alto": 20,
+                    "vword": "HEURISTICA", // 10 letters
+                    "answers": [
+                        "DESCUBRIR",        // H
+                        "EXPLORACION",      // E
+                        "INNOVACION",       // U
+                        "CREATIVIDAD",      // R
+                        "INTUICION",        // I
+                        "SOLUCION",         // S
+                        "ALGORITMO",        // T
+                        "INSPIRACION",      // I
+                        "CONJETURA",        // C
+                        "ESTRATEGIA"        // A
+                    ],
+                    "refs": [
+                        "Hallar lo desconocido",
+                        "Investigación de un lugar",
+                        "Acción de introducir novedades",
+                        "Capacidad de crear",
+                        "Percepción clara e instantánea",
+                        "Respuesta a un problema",
+                        "Conjunto de reglas para resolver un problema",
+                        "Estímulo creativo",
+                        "Suposición probable",
+                        "Plan para lograr un objetivo"
+                    ]
+                },
+                "Crucigrama 4 D": {
+                    "ancho": 20, "alto": 20,
+                    "vword": "COGNICION", // 9 letters
+                    "answers": [
+                        "PERCEPCION",       // C
+                        "RAZONAMIENTO",     // O
+                        "APRENDIZAJE",      // G
+                        "MEMORIA",          // N
+                        "IMAGINACION",      // I
+                        "LENGUAJE",         // C
+                        "PENSAMIENTO",      // I
+                        "COMPRENSION",      // O
+                        "DECISION"          // N
+                    ],
+                    "refs": [
+                        "Proceso de interpretar información sensorial",
+                        "Capacidad de lógica",
+                        "Adquisición de conocimientos",
+                        "Capacidad de recordar",
+                        "Creación de imágenes mentales",
+                        "Sistema de comunicación",
+                        "Proceso mental de ideas",
+                        "Entendimiento de algo",
+                        "Elección entre alternativas"
+                    ]
+                },
+                "Crucigrama 5 D": {
+                    "ancho": 20, "alto": 20,
+                    "vword": "ONTOLOGIA", // 9 letters
+                    "answers": [
+                        "EXISTENCIA",       // O
+                        "REALIDAD",         // N
+                        "SER",              // T
+                        "NATURALEZA",       // O
+                        "METAFIZICA",       // L
+                        "UNIVERSO",         // O
+                        "ESENCIA",          // G
+                        "VERDAD",           // I
+                        "FENOMENO"          // A
+                    ],
+                    "refs": [
+                        "Hecho de ser o existir",
+                        "Lo que es verdadero y efectivo",
+                        "Lo que tiene vida o existencia",
+                        "Conjunto de todo lo natural",
+                        "Rama de la filosofía que estudia los principios de la realidad",
+                        "Conjunto de todo lo creado",
+                        "Lo que constituye la naturaleza de algo",
+                        "Conformidad con los hechos",
+                        "Manifestación observable"
+                    ]
+                }
+            }
+        };
 
-                // First, assign unique numbers to starting cells
-                cluesForPuzzle.forEach(data => {
-                    const key = `${data.start[0]}-${data.start[1]}`;
-                    if (!startCellMap[key]) {
-                        startCellMap[key] = { acrossClue: null, downClue: null, number: null };
-                    }
-                    if (data.direction === "across") {
-                        startCellMap[key].acrossClue = data;
+        /**
+         * Draws the crossword grid based on the vertical word and horizontal answers.
+         * @param {string} vword - The vertical word.
+         * @param {string[]} ans - Array of horizontal words.
+         * @param {boolean} showAnswers - If true, pre-fills the answers.
+         * @param {number} crosswordWidth - The desired width of the crossword grid.
+         * @param {number} crosswordHeight - The desired height of the crossword grid.
+         */
+        function drawCrossword(vword, ans, showAnswers, crosswordWidth, crosswordHeight) {
+            let html = `<form><table class="crossword-table">`;
+            numberOfInputs = 0; // Reset for new crossword
+
+            // Calculate dynamic center column based on current crossword width
+            const centerColumn = Math.floor(crosswordWidth / 2);
+
+            // Loop through rows based on crosswordHeight
+            for (let i = 0; i < crosswordHeight; i++) {
+                html += '<tr>';
+                
+                // Ensure vword[i] exists for the current row
+                const currentVWordChar = (i < vword.length) ? vword[i].toLowerCase() : '';
+                // Ensure ans[i] exists for the current row
+                const currentAnsWord = (i < ans.length) ? ans[i].toLowerCase() : '';
+
+                let intersectionIndex = -1;
+                // Only try to find intersection if both vertical char and horizontal word exist
+                if (currentVWordChar && currentAnsWord) {
+                    intersectionIndex = currentAnsWord.indexOf(currentVWordChar);
+                }
+                
+                // Calculate the starting position for the horizontal word to align its intersection with `centerColumn`
+                let initPosition;
+                if (intersectionIndex !== -1) {
+                    initPosition = centerColumn - intersectionIndex;
+                } else {
+                    // If no intersection, center the word or place it at a default offset
+                    initPosition = centerColumn - Math.floor(currentAnsWord.length / 2);
+                }
+                
+                // Loop through columns based on crosswordWidth
+                for (let j = 0; j < crosswordWidth; j++) {
+                    const isVerticalWordCell = (j === centerColumn && i < vword.length);
+                    const isHorizontalWordCell = (j >= initPosition && j < initPosition + currentAnsWord.length && currentAnsWord.length > 0);
+                    
+                    let charToFill = '';
+                    let tdClass = '';
+                    let inputClass = '';
+                    let isDisabled = '';
+                    
+                    if (isVerticalWordCell && isHorizontalWordCell) {
+                        // Intersection cell
+                        charToFill = vword[i].toUpperCase();
+                        tdClass = 'table-primary'; // Vertical word color
+                        isDisabled = 'disabled'; // Disable input for intersection cells
+                        inputClass = 'text-center'; // Ensure text is centered
+                    } else if (isVerticalWordCell) {
+                        // Vertical word only cell
+                        charToFill = vword[i].toUpperCase();
+                        tdClass = 'table-primary';
+                        isDisabled = 'disabled';
+                        inputClass = 'text-center';
+                    } else if (isHorizontalWordCell) {
+                        // Horizontal word only cell
+                        charToFill = currentAnsWord[j - initPosition].toUpperCase();
+                        tdClass = 'table-secondary'; // Fillable cell background
+                        numberOfInputs++; // Count as a fillable input
                     } else {
-                        startCellMap[key].downClue = data;
+                        // Empty cell (black cell equivalent)
+                        tdClass = 'bg-gray-800'; // Dark background for empty cells
+                        isDisabled = 'disabled';
                     }
-                });
 
-                // Sort unique starting cells to assign numbers logically (top-left first)
-                const sortedKeys = Object.keys(startCellMap).sort((a, b) => {
-                    const [r1, c1] = a.split('-').map(Number);
-                    const [r2, c2] = b.split('-').map(Number);
-                    if (r1 !== r2) return r1 - r2;
-                    return c1 - c2;
-                });
-
-                sortedKeys.forEach(key => {
-                    const cellInfo = startCellMap[key];
-                    cellInfo.number = clueNumberCounter++; // Assign a number to the cell
-                    // Assign this number back to the original crosswordData objects
-                    if (cellInfo.acrossClue) {
-                        cellInfo.acrossClue.assignedClueNumber = cellInfo.number;
+                    html += `<td class="${tdClass} crossword-cell" data-row="${i}" data-col="${j}">`;
+                    if (tdClass !== 'bg-gray-800') { // Only add input for non-black cells
+                        const value = showAnswers ? charToFill : '';
+                        html += `<input type="text" maxlength="1" data-row="${i}" data-col="${j}" class="${inputClass}" value="${value}" ${isDisabled}>`;
                     }
-                    if (cellInfo.downClue) {
-                        cellInfo.downClue.assignedClueNumber = cellInfo.number;
-                    }
-                });
+                    html += `</td>`;
+                }
+                html += '</tr>';
+            }
+            
+            html += `</table></form>`;
+            CPUZZLE_CONTAINER.innerHTML = html;
 
-                // Now, initialize grid with empty cells and no clue numbers initially
-                grid = Array(currentGridSize).fill(null).map(() => Array(currentGridSize).fill({ char: '', input: '', isBlack: false, clueNumber: null }));
+            // Add event listeners for inputs
+            CPUZZLE_CONTAINER.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', checkAnswer);
+                input.addEventListener('keydown', handleInputNavigation);
+                input.addEventListener('focus', handleCellFocus);
+                input.addEventListener('blur', handleCellBlur);
+            });
+        }
 
-                // Place words on the grid and record the clue number for the starting cell
-                cluesForPuzzle.forEach(data => {
-                    let r = data.start[0];
-                    let c = data.start[1];
-                    let wordChars = data.word.split('');
+        /**
+         * Renders the hints for the current crossword puzzle.
+         */
+        function drawReferences() {
+            REFERENCES_CONTAINER.innerHTML = '';
+            _refs.forEach((ref, index) => {
+                const li = document.createElement('li');
+                li.id = `hint-${index}`; // Add an ID for easy reference
+                li.textContent = `${index + 1}. ${ref}`;
+                REFERENCES_CONTAINER.appendChild(li);
+            });
+        }
 
-                    for (let i = 0; i < wordChars.length; i++) {
-                        let currentRow = r;
-                        let currentCol = c;
-                        if (data.direction === "across") {
-                            currentCol += i;
-                        } else {
-                            currentRow += i;
-                        }
+        /**
+         * Checks the entered answer and updates the UI.
+         */
+        function checkAnswer(event) {
+            const input = event.target;
+            const row = parseInt(input.dataset.row);
+            const col = parseInt(input.dataset.col);
+            const enteredChar = input.value.toUpperCase();
 
-                        if (currentRow >= 0 && currentRow < currentGridSize && currentCol >= 0 && currentCol < currentGridSize) {
-                            // Ensure the object in the grid is mutable and not a shared reference to the initial empty state
-                            if (grid[currentRow][currentCol].isBlack === undefined || grid[currentRow][currentCol].isBlack === true) {
-                                grid[currentRow][currentCol] = { char: '', input: '', isBlack: false, clueNumber: null };
-                            }
-                            grid[currentRow][currentCol].char = wordChars[i];
-                            grid[currentRow][currentCol].input = ''; // Reset input on grid creation
+            // Find the character from the vertical word
+            const centerColumn = Math.floor(currentCrosswordsForLevel[currentCrosswordIndex].ancho / 2);
+            const vwordChar = (col === centerColumn && row < _vword.length) ? _vword[row].toUpperCase() : null;
 
-                            // Assign the assignedClueNumber to the grid cell if it's the start of a word
-                            if (i === 0) {
-                                grid[currentRow][currentCol].clueNumber = data.assignedClueNumber;
-                            }
-                        }
-                    }
-                });
+            // Find the character from the horizontal word
+            let hwordChar = null;
+            const currentAnsWord = currentCrosswordsForLevel[currentCrosswordIndex].answers[row];
+            if (currentAnsWord) {
+                const currentVWordCharForHWord = (row < _vword.length) ? _vword[row].toLowerCase() : '';
+                const intersectionIndex = currentAnsWord.toLowerCase().indexOf(currentVWordCharForHWord);
+                let initPosition;
+                if (intersectionIndex !== -1) {
+                    initPosition = centerColumn - intersectionIndex;
+                } else {
+                    initPosition = centerColumn - Math.floor(currentAnsWord.length / 2);
+                }
 
-                // Fill in black squares where no word is present
-                for (let r = 0; r < currentGridSize; r++) {
-                    for (let c = 0; c < currentGridSize; c++) {
-                        if (grid[r][c].char === '') {
-                            grid[r][c].isBlack = true;
-                        }
-                    }
+                if (col >= initPosition && col < initPosition + currentAnsWord.length) {
+                    hwordChar = currentAnsWord[col - initPosition].toUpperCase();
                 }
             }
 
-            function renderCrossword() {
-                crosswordGridElement.innerHTML = '';
-                crosswordGridElement.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
-                crosswordGridElement.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+            // Determine the correct character for this cell
+            let correctChar = '';
+            if (vwordChar && hwordChar && vwordChar === hwordChar) {
+                correctChar = vwordChar; // It's an intersection, character must match
+            } else if (vwordChar) {
+                correctChar = vwordChar; // Only vertical word
+            } else if (hwordChar) {
+                correctChar = hwordChar; // Only horizontal word
+            }
 
-                grid.forEach((row, r) => {
-                    row.forEach((cell, c) => {
-                        const cellDiv = document.createElement('div');
-                        cellDiv.classList.add('crossword-cell');
-                        if (cell.isBlack) {
-                            cellDiv.classList.add('black');
-                        } else {
-                            const input = document.createElement('input');
-                            input.type = 'text';
-                            input.maxLength = 1;
-                            input.dataset.row = r;
-                            input.dataset.col = c;
-                            input.value = cell.input;
-                            input.addEventListener('input', (e) => {
-                                cell.input = e.target.value.toUpperCase();
-                                if (e.target.value.length === 1) {
-                                    const nextCell = getNextCell(r, c);
-                                    if (nextCell) {
-                                        const nextInput = crosswordGridElement.querySelector(`input[data-row="${nextCell.r}"][data-col="${nextCell.c}"]`);
-                                        if (nextInput) {
-                                            nextInput.focus();
-                                            nextInput.select(); // Select text for easier overwriting
-                                        }
-                                    }
-                                }
-                            });
-                            input.addEventListener('focus', (e) => {
-                                document.querySelectorAll('.crossword-cell.active').forEach(el => el.classList.remove('active'));
-                                e.target.closest('.crossword-cell').classList.add('active');
-                                updateClueInfo(r, c);
-                            });
-                            input.addEventListener('blur', (e) => {
-                                e.target.closest('.crossword-cell').classList.remove('active');
-                                currentClueInfoElement.textContent = ''; // Clear clue info on blur
-                            });
+            if (enteredChar === correctChar) {
+                input.classList.remove('wrong-answer');
+                input.classList.add('correct-answer');
+            } else {
+                input.classList.remove('correct-answer');
+                input.classList.add('wrong-answer');
+            }
 
-                            cellDiv.appendChild(input);
-                            if (cell.clueNumber !== null) {
-                                const clueNumSpan = document.createElement('span');
-                                clueNumSpan.classList.add('clue-number');
-                                clueNumSpan.textContent = cell.clueNumber;
-                                cellDiv.appendChild(clueNumSpan);
-                            }
-                        }
-                        crosswordGridElement.appendChild(cellDiv);
+            updateProgressBar();
+            checkCrosswordCompletion(); // Check if the crossword is complete after each input
+        }
+
+
+        /**
+         * Handles keyboard navigation for input cells.
+         * @param {KeyboardEvent} event
+         */
+        function handleInputNavigation(event) {
+            const input = event.target;
+            const row = parseInt(input.dataset.row);
+            const col = parseInt(input.dataset.col);
+
+            let nextInput = null;
+
+            switch (event.key) {
+                case 'ArrowRight':
+                    nextInput = CPUZZLE_CONTAINER.querySelector(`input[data-row="${row}"][data-col="${col + 1}"]`);
+                    break;
+                case 'ArrowLeft':
+                    nextInput = CPUZZLE_CONTAINER.querySelector(`input[data-row="${row}"][data-col="${col - 1}"]`);
+                    break;
+                case 'ArrowDown':
+                    nextInput = CPUZZLE_CONTAINER.querySelector(`input[data-row="${row + 1}"][data-col="${col}"]`);
+                    break;
+                case 'ArrowUp':
+                    nextInput = CPUZZLE_CONTAINER.querySelector(`input[data-row="${row - 1}"][data-col="${col}"]`);
+                    break;
+                case 'Enter':
+                    event.preventDefault(); // Prevent form submission
+                    checkCrosswordCompletion(); // Check completion on Enter
+                    break;
+            }
+
+            if (nextInput && !nextInput.disabled) {
+                nextInput.focus();
+                nextInput.select(); // Select the text for easier overwriting
+            }
+        }
+
+        /**
+         * Highlights the word associated with the focused cell and its hint.
+         * @param {FocusEvent} event
+         */
+        function handleCellFocus(event) {
+            const input = event.target;
+            const row = parseInt(input.dataset.row);
+            const col = parseInt(input.dataset.col);
+
+            // Remove existing highlights
+            CPUZZLE_CONTAINER.querySelectorAll('.crossword-cell.highlighted').forEach(cell => {
+                cell.classList.remove('highlighted');
+            });
+            REFERENCES_CONTAINER.querySelectorAll('.hint-highlighted').forEach(hint => {
+                hint.classList.remove('hint-highlighted');
+            });
+
+            const crosswordData = currentCrosswordsForLevel[currentCrosswordIndex];
+            const centerColumn = Math.floor(crosswordData.ancho / 2);
+
+            // Highlight horizontal word and hint
+            const hword = crosswordData.answers[row];
+            if (hword) {
+                const vwordCharForHWord = (row < _vword.length) ? _vword[row].toLowerCase() : '';
+                const intersectionIndex = hword.toLowerCase().indexOf(vwordCharForHWord);
+                let initPosition;
+                if (intersectionIndex !== -1) {
+                    initPosition = centerColumn - intersectionIndex;
+                } else {
+                    initPosition = centerColumn - Math.floor(hword.length / 2);
+                }
+
+                for (let c = 0; c < hword.length; c++) {
+                    const cell = CPUZZLE_CONTAINER.querySelector(`td[data-row="${row}"][data-col="${initPosition + c}"]`);
+                    if (cell) {
+                        cell.classList.add('highlighted');
+                    }
+                }
+                const hint = REFERENCES_CONTAINER.querySelector(`#hint-${row}`);
+                if (hint) {
+                    hint.classList.add('hint-highlighted');
+                }
+            }
+
+            // Highlight vertical word and hint (if applicable)
+            if (col === centerColumn) {
+                for (let r = 0; r < _vword.length; r++) {
+                    const cell = CPUZZLE_CONTAINER.querySelector(`td[data-row="${r}"][data-col="${col}"]`);
+                    if (cell) {
+                        cell.classList.add('highlighted');
+                    }
+                }
+                // The vertical word doesn't have a direct hint by index, so we can skip highlighting a specific hint for it
+                // Or you could add a special 'vertical' hint if desired in the data structure
+            }
+        }
+
+        /**
+         * Removes highlights when a cell loses focus.
+         */
+        function handleCellBlur() {
+            CPUZZLE_CONTAINER.querySelectorAll('.crossword-cell.highlighted').forEach(cell => {
+                cell.classList.remove('highlighted');
+            });
+            REFERENCES_CONTAINER.querySelectorAll('.hint-highlighted').forEach(hint => {
+                hint.classList.remove('hint-highlighted');
+            });
+        }
+
+        /**
+         * Updates the progress bar based on the number of correct answers.
+         */
+        function updateProgressBar() {
+            let correctCount = 0;
+            CPUZZLE_CONTAINER.querySelectorAll('input').forEach(input => {
+                const row = parseInt(input.dataset.row);
+                const col = parseInt(input.dataset.col);
+
+                // Determine the correct character based on both vertical and horizontal words
+                const centerColumn = Math.floor(currentCrosswordsForLevel[currentCrosswordIndex].ancho / 2);
+                let correctCharForCell = '';
+
+                // Check vertical word char
+                const vwordCharForCell = (col === centerColumn && row < _vword.length) ? _vword[row].toUpperCase() : null;
+
+                // Check horizontal word char
+                let hwordCharForCell = null;
+                const currentAnsWord = currentCrosswordsForLevel[currentCrosswordIndex].answers[row];
+                if (currentAnsWord) {
+                    const vwordCharForHWord = (row < _vword.length) ? _vword[row].toLowerCase() : '';
+                    const intersectionIndex = currentAnsWord.toLowerCase().indexOf(vwordCharForHWord);
+                    let initPosition;
+                    if (intersectionIndex !== -1) {
+                        initPosition = centerColumn - intersectionIndex;
+                    } else {
+                        initPosition = centerColumn - Math.floor(currentAnsWord.length / 2);
+                    }
+                    
+                    if (col >= initPosition && col < initPosition + currentAnsWord.length) {
+                        hwordCharForCell = currentAnsWord[col - initPosition].toUpperCase();
+                    }
+                }
+
+                if (vwordCharForCell && hwordCharForCell && vwordCharForCell === hwordCharForCell) {
+                    correctCharForCell = vwordCharForCell; // Intersection
+                } else if (vwordCharForCell) {
+                    correctCharForCell = vwordCharForCell; // Only vertical
+                } else if (hwordCharForCell) {
+                    correctCharForCell = hwordCharForCell; // Only horizontal
+                }
+
+                if (input.value.toUpperCase() === correctCharForCell) {
+                    correctCount++;
+                }
+            });
+
+            const percentage = (correctCount / numberOfInputs) * 100;
+            progressBar.style.width = `${percentage}%`;
+            progressBar.setAttribute('aria-valuenow', percentage);
+        }
+
+        /**
+         * Checks if the entire crossword is completed correctly.
+         */
+        function checkCrosswordCompletion() {
+            let allFilledAndCorrect = true;
+            CPUZZLE_CONTAINER.querySelectorAll('input').forEach(input => {
+                const row = parseInt(input.dataset.row);
+                const col = parseInt(input.dataset.col);
+
+                const centerColumn = Math.floor(currentCrosswordsForLevel[currentCrosswordIndex].ancho / 2);
+                let correctCharForCell = '';
+
+                const vwordCharForCell = (col === centerColumn && row < _vword.length) ? _vword[row].toUpperCase() : null;
+
+                let hwordCharForCell = null;
+                const currentAnsWord = currentCrosswordsForLevel[currentCrosswordIndex].answers[row];
+                if (currentAnsWord) {
+                    const vwordCharForHWord = (row < _vword.length) ? _vword[row].toLowerCase() : '';
+                    const intersectionIndex = currentAnsWord.toLowerCase().indexOf(vwordCharForHWord);
+                    let initPosition;
+                    if (intersectionIndex !== -1) {
+                        initPosition = centerColumn - intersectionIndex;
+                    } else {
+                        initPosition = centerColumn - Math.floor(currentAnsWord.length / 2);
+                    }
+                    
+                    if (col >= initPosition && col < initPosition + currentAnsWord.length) {
+                        hwordCharForCell = currentAnsWord[col - initPosition].toUpperCase();
+                    }
+                }
+
+                if (vwordCharForCell && hwordCharForCell && vwordCharForCell === hwordCharForCell) {
+                    correctCharForCell = vwordCharForCell;
+                } else if (vwordCharForCell) {
+                    correctCharForCell = vwordCharForCell;
+                } else if (hwordCharForCell) {
+                    correctCharForCell = hwordCharForCell;
+                }
+
+                if (input.value.toUpperCase() !== correctCharForCell || input.value === '') {
+                    allFilledAndCorrect = false;
+                }
+            });
+
+            if (allFilledAndCorrect) {
+                showMessage('¡Crucigrama Completado!', 'text-green-600');
+                successModal.show(); // Show Bootstrap success modal
+                updateScore(100); // Award points for completion
+                nextCrosswordBtn.classList.remove('hidden'); // Show next crossword button
+                restartGameBtn.classList.add('hidden'); // Hide restart button
+                revealLetterBtn.classList.add('hidden'); // Hide reveal letter button
+            }
+        }
+
+        /**
+         * Displays a temporary message to the user.
+         * @param {string} msg - The message to display.
+         * @param {string} colorClass - Tailwind CSS class for text color (e.g., 'text-red-500', 'text-green-500').
+         */
+        function showMessage(msg, colorClass) {
+            clearTimeout(messageTimeout); // Clear any existing timeout
+            messageDisplay.textContent = msg;
+            messageDisplay.className = `text-center font-medium mt-2 transition duration-300 ease-in-out ${colorClass}`;
+            messageTimeout = setTimeout(() => {
+                messageDisplay.textContent = '';
+                messageDisplay.className = 'text-center font-medium mt-2 transition duration-300 ease-in-out';
+            }, 3000); // Message disappears after 3 seconds
+        }
+
+        /**
+         * Updates the player's total score.
+         * @param {number} points - Points to add or subtract.
+         */
+        function updateScore(points) {
+            totalScore += points;
+            scoreDisplay.textContent = `Puntuación: ${totalScore}`;
+        }
+
+        /**
+         * Initializes a new crossword game for the given level and index.
+         * @param {string} level - The difficulty level ('facil', 'medio', 'dificil').
+         * @param {number} index - The index of the crossword puzzle within that level.
+         */
+        function initCrosswordGame(level, index) {
+            currentLevel = level;
+            currentCrosswordIndex = index;
+            currentCrosswordsForLevel = Object.values(crucigramas[currentLevel]);
+
+            if (index >= currentCrosswordsForLevel.length) {
+                showMessage(`¡Has completado todos los crucigramas ${currentLevel}!`, 'text-blue-600');
+                nextCrosswordBtn.classList.add('hidden'); // No hay más crucigramas en este nivel
+                restartGameBtn.classList.add('hidden');
+                revealLetterBtn.classList.add('hidden');
+                return;
+            }
+
+            const currentCrosswordData = currentCrosswordsForLevel[currentCrosswordIndex];
+            _vword = currentCrosswordData.vword;
+            _answers = currentCrosswordData.answers;
+            _refs = currentCrosswordData.refs;
+
+            crosswordTitle.textContent = currentCrosswordData.name;
+            crosswordCounter.textContent = `Crucigrama ${currentCrosswordIndex + 1} de ${currentCrosswordsForLevel.length}`;
+            
+            drawCrossword(_vword, _answers, false, currentCrosswordData.ancho, currentCrosswordData.alto);
+            drawReferences();
+            updateProgressBar(); // Reset progress bar
+            showMessage('', ''); // Clear any previous messages
+
+            nextCrosswordBtn.classList.add('hidden'); // Hide next crossword button initially
+            restartGameBtn.classList.remove('hidden'); // Show restart button
+            revealLetterBtn.classList.remove('hidden'); // Show reveal letter button
+
+            levelSelectionDiv.classList.add('hidden'); // Oculta la selección de nivel
+            gameAreaDiv.classList.remove('hidden'); // Muestra el área de juego
+        }
+
+        /**
+         * Sets up event listeners for level selection buttons.
+         */
+        function setupLevelButtons() {
+            document.getElementById('btn-facil').addEventListener('click', () => initCrosswordGame('facil', 0));
+            document.getElementById('btn-medio').addEventListener('click', () => initCrosswordGame('medio', 0));
+            document.getElementById('btn-dificil').addEventListener('click', () => initCrosswordGame('dificil', 0));
+        }
+
+        /**
+         * Event listener for the "Next Crossword" button.
+         */
+        nextCrosswordBtn.addEventListener('click', () => {
+            initCrosswordGame(currentLevel, currentCrosswordIndex + 1);
+        });
+
+        /**
+         * Event listener for the "Restart Current Crossword" button.
+         */
+        restartGameBtn.addEventListener('click', () => {
+            initCrosswordGame(currentLevel, currentCrosswordIndex); // Reload current crossword
+            updateScore(-totalScore); // Reset score for the current crossword
+            showMessage('Crucigrama reiniciado.', 'text-gray-500');
+        });
+
+        /**
+         * Event listener for the "Reveal Letter" button.
+         */
+        revealLetterBtn.addEventListener('click', () => {
+            if (totalScore < 10) {
+                showMessage('No tienes suficientes puntos para revelar una letra (necesitas 10).', 'text-red-500');
+                return;
+            }
+
+            const inputs = Array.from(CPUZZLE_CONTAINER.querySelectorAll('input:not([disabled]):not(.correct-answer)'));
+            if (inputs.length > 0) {
+                const randomIndex = Math.floor(Math.random() * inputs.length);
+                const inputToReveal = inputs[randomIndex];
+                const row = parseInt(inputToReveal.dataset.row);
+                const col = parseInt(inputToReveal.dataset.col);
+
+                // Determine the correct character for this cell
+                const crosswordData = currentCrosswordsForLevel[currentCrosswordIndex];
+                const centerColumn = Math.floor(crosswordData.ancho / 2);
+                let correctChar = '';
+
+                const vwordCharForCell = (col === centerColumn && row < _vword.length) ? _vword[row].toUpperCase() : null;
+
+                let hwordCharForCell = null;
+                const currentAnsWord = crosswordData.answers[row];
+                if (currentAnsWord) {
+                    const vwordCharForHWord = (row < _vword.length) ? _vword[row].toLowerCase() : '';
+                    const intersectionIndex = currentAnsWord.toLowerCase().indexOf(vwordCharForHWord);
+                    let initPosition;
+                    if (intersectionIndex !== -1) {
+                        initPosition = centerColumn - intersectionIndex;
+                    } else {
+                        initPosition = centerColumn - Math.floor(currentAnsWord.length / 2);
+                    }
+                    
+                    if (col >= initPosition && col < initPosition + currentAnsWord.length) {
+                        hwordCharForCell = currentAnsWord[col - initPosition].toUpperCase();
+                    }
+                }
+
+                if (vwordCharForCell && hwordCharForCell && vwordCharForCell === hwordCharForCell) {
+                    correctChar = vwordCharForCell;
+                } else if (vwordCharForCell) {
+                    correctChar = vwordCharForCell;
+                } else if (hwordCharForCell) {
+                    correctChar = hwordCharForCell;
+                }
+                
+                inputToReveal.value = correctChar;
+                inputToReveal.classList.add('correct-answer');
+                inputToReveal.disabled = true; // Disable revealed letter
+                updateScore(-10); // Subtract points
+                updateProgressBar();
+                showMessage('¡Letra revelada!', 'text-yellow-500');
+                checkCrosswordCompletion(); // Check completion after revealing a letter
+            } else {
+                showMessage('Todas las letras ya han sido reveladas o respondidas.', 'text-gray-500');
+            }
+        });
+
+        /**
+         * Event listener for the "Main Menu" button.
+         */
+        menuBtn.addEventListener('click', () => {
+            showGamePortal();
+            // Reset crossword game state for next time it's played
+            levelSelectionDiv.classList.remove('hidden');
+            gameAreaDiv.classList.add('hidden');
+            totalScore = 0; // Reset overall score
+            scoreDisplay.textContent = `Puntuación: 0`;
+            crosswordTitle.textContent = ''; // Clear title
+            crosswordCounter.textContent = 'Crucigrama 0 de 5'; // Reset counter
+            progressBar.style.width = '0%'; // Reset progress bar
+            progressBar.setAttribute('aria-valuenow', 0);
+            showMessage('', ''); // Clear messages
+            nextCrosswordBtn.classList.add('hidden');
+            restartGameBtn.classList.add('hidden');
+            revealLetterBtn.classList.add('hidden');
+        });
+
+        // --- Color Configuration Modal Logic ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const colorForm = document.getElementById('colorForm');
+            if (colorForm) {
+                const inputs = colorForm.querySelectorAll('input[type="color"]');
+                inputs.forEach(input => {
+                    originalColors[input.id] = input.value; // Save initial colors
+                    input.addEventListener('input', (e) => {
+                        document.documentElement.style.setProperty(`--${e.target.name}`, e.target.value);
                     });
                 });
-
-                renderClues();
             }
+        });
 
-            function getNextCell(r, c) {
-                // Try to move right first
-                for (let col = c + 1; col < gridSize; col++) {
-                    if (!grid[r][col].isBlack) {
-                        return { r: r, c: col };
-                    }
-                }
-                // If no more cells to the right, move to the next row from column 0
-                for (let row = r + 1; row < gridSize; row++) {
-                    for (let col = 0; col < gridSize; col++) {
-                        if (!grid[row][col].isBlack) {
-                            return { r: row, c: col };
-                        }
-                    }
-                }
-                return null; // No more cells
-            }
-
-
-            function renderClues() {
-                cluesAcrossElement.innerHTML = '';
-                cluesDownElement.innerHTML = '';
-
-                // Filter and sort clues by assigned clue number
-                const currentPuzzlesClues = crosswordPuzzles[currentDifficulty][currentPuzzleIndex].clues;
-                const acrossClues = currentPuzzlesClues.filter(data => data.direction === "across").sort((a, b) => a.assignedClueNumber - b.assignedClueNumber);
-                const downClues = currentPuzzlesClues.filter(data => data.direction === "down").sort((a, b) => a.assignedClueNumber - b.assignedClueNumber);
-
-                acrossClues.forEach(data => {
-                    const listItem = document.createElement('li');
-                    listItem.dataset.clueNumber = data.assignedClueNumber;
-                    listItem.textContent = `${data.assignedClueNumber}. ${data.clue}`;
-                    cluesAcrossElement.appendChild(listItem);
-                });
-
-                downClues.forEach(data => {
-                    const listItem = document.createElement('li');
-                    listItem.dataset.clueNumber = data.assignedClueNumber;
-                    listItem.textContent = `${data.assignedClueNumber}. ${data.clue}`;
-                    cluesDownElement.appendChild(listItem);
-                });
-            }
-
-            function updateClueInfo(r, c) {
-                currentClueInfoElement.innerHTML = '';
-                const activeCell = grid[r][c];
-                const currentPuzzlesClues = crosswordPuzzles[currentDifficulty][currentPuzzleIndex].clues;
-
-                if (activeCell && !activeCell.isBlack) {
-                    const relevantClues = currentPuzzlesClues.filter(data => {
-                        const wordLength = data.word.length;
-                        const [startR, startC] = data.start;
-
-                        if (data.direction === 'across') {
-                            return r === startR && c >= startC && c < startC + wordLength;
-                        } else { // 'down'
-                            return c === startC && r >= startR && r < startR + wordLength;
-                        }
-                    }).sort((a, b) => a.assignedClueNumber - b.assignedClueNumber);
-
-                    if (relevantClues.length > 0) {
-                        relevantClues.forEach(clueData => {
-                            const clueText = document.createElement('span');
-                            clueText.textContent = `${clueData.assignedClueNumber}. ${clueData.clue} (${clueData.direction === 'across' ? 'Horizontal' : 'Vertical'})`;
-                            currentClueInfoElement.appendChild(clueText);
-                            currentClueInfoElement.appendChild(document.createElement('br'));
-                        });
-                    }
-                }
-            }
-
-            function checkCrossword() {
-                let allCorrect = true;
-                crosswordMessageElement.textContent = '';
-                crosswordMessageElement.style.color = '';
-
-                for (let r = 0; r < gridSize; r++) {
-                    for (let c = 0; c < gridSize; c++) {
-                        const cell = grid[r][c];
-                        const inputElement = crosswordGridElement.querySelector(`input[data-row="${r}"][data-col="${c}"]`);
-                        if (!cell.isBlack) {
-                            if (cell.input.toUpperCase() !== cell.char.toUpperCase()) {
-                                allCorrect = false;
-                                if (inputElement) {
-                                    inputElement.style.backgroundColor = '#FFCCCC'; // Light red for incorrect
-                                }
-                            } else {
-                                if (inputElement) {
-                                    inputElement.style.backgroundColor = ''; // Reset background for correct
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (allCorrect) {
-                    crosswordMessageElement.textContent = '¡Felicidades! Has resuelto el crucigrama.';
-                    crosswordMessageElement.style.color = '#10B981'; // Green for success
-                    
-                    displayLevelCompleteMessage(crosswordPuzzles[currentDifficulty][currentPuzzleIndex].levelCompleteMessage);
-
-                } else {
-                    crosswordMessageElement.textContent = 'Hay errores. Sigue intentándolo.';
-                    crosswordMessageElement.style.color = '#EF4444'; // Red for incorrect
-                }
-            }
-
-            function resetCrossword() {
-                crosswordMessageElement.textContent = '';
-                crosswordMessageElement.style.color = '';
-                currentClueInfoElement.textContent = '';
-                document.querySelectorAll('.crossword-cell input').forEach(input => {
-                    input.style.backgroundColor = '';
-                });
-                loadPuzzle(currentPuzzleIndex); // Reload current puzzle to clear inputs
-            }
-
-            function loadPuzzle(index) {
-                // Hide level complete message and show game area
-                levelCompleteMessageDiv.classList.add('hidden');
-                crosswordGameArea.classList.remove('hidden');
-
-                const puzzlesOfDifficulty = crosswordPuzzles[currentDifficulty];
-                if (index < puzzlesOfDifficulty.length) {
-                    currentPuzzleIndex = index;
-                    const puzzleData = puzzlesOfDifficulty[currentPuzzleIndex];
-                    gridSize = puzzleData.gridSize; // Update gridSize for the current puzzle
-                    assignClueNumbersAndPrepareGridData(puzzleData.clues, puzzleData.gridSize);
-                    renderCrossword();
-                    crosswordMessageElement.textContent = '';
-                    currentClueInfoElement.textContent = '';
-                } else {
-                    // All puzzles in this difficulty completed
-                    levelCompleteText.textContent = `¡Felicidades! Has completado todos los crucigramas ${currentDifficulty}.`;
-                    nextCrosswordButton.textContent = "Volver a Elegir Dificultad";
-                    levelCompleteMessageDiv.classList.remove('hidden');
-                    crosswordGameArea.classList.add('hidden');
-                    nextCrosswordButton.classList.remove('hidden'); // Show button immediately to allow difficulty selection
-                }
-            }
-
-            function displayLevelCompleteMessage(message) {
-                crosswordGameArea.classList.add('hidden');
-                levelCompleteMessageDiv.classList.remove('hidden');
-                levelCompleteText.textContent = message;
-                nextCrosswordButton.classList.add('hidden'); // Hide until timer expires
-
-                setTimeout(() => {
-                    nextCrosswordButton.classList.remove('hidden');
-                    nextCrosswordButton.textContent = 'Siguiente Nivel';
-                    if (currentPuzzleIndex + 1 >= crosswordPuzzles[currentDifficulty].length) {
-                         nextCrosswordButton.textContent = 'Volver a Elegir Dificultad';
-                    }
-                }, 30000); // Show button after 30 seconds
-            }
-
-            // Event Listeners for difficulty buttons
-            difficultyButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    currentDifficulty = e.target.dataset.difficulty;
-                    currentPuzzleIndex = 0; // Reset to the first puzzle for the new difficulty
-                    loadPuzzle(currentPuzzleIndex);
-                });
+        function saveColors() {
+            const colorForm = document.getElementById('colorForm');
+            const inputs = colorForm.querySelectorAll('input[type="color"]');
+            inputs.forEach(input => {
+                // In a real application, you'd save these to localStorage or a database
+                // For this example, colors are applied directly via CSS variables
             });
+            // Dismiss the modal
+            const configModal = bootstrap.Modal.getInstance(document.getElementById('configurationModal'));
+            if (configModal) {
+                configModal.hide();
+            }
+        }
 
-            // Event listener for next crossword button
-            nextCrosswordButton.addEventListener('click', () => {
-                if (currentPuzzleIndex + 1 < crosswordPuzzles[currentDifficulty].length) {
-                    loadPuzzle(currentPuzzleIndex + 1);
-                } else {
-                    // All puzzles in current difficulty completed, go back to difficulty selection
-                    loadPuzzle(0); // Load the first puzzle of the current difficulty or simply reset
-                    currentPuzzleIndex = 0; // Ensure index is reset
-                    // Make difficulty buttons visible again
-                    difficultyButtons.forEach(btn => btn.classList.remove('hidden'));
-                    crosswordGameArea.classList.add('hidden');
-                    levelCompleteMessageDiv.classList.add('hidden'); // Hide level complete message
-                    // Or, if desired, show a final "all complete" message and let them choose difficulty
-                }
+        function reiniciarColores() {
+            const colorForm = document.getElementById('colorForm');
+            const inputs = colorForm.querySelectorAll('input[type="color"]');
+            inputs.forEach(input => {
+                input.value = originalColors[input.id]; // Reset input value
+                document.documentElement.style.setProperty(`--${input.name}`, originalColors[input.id]); // Apply to CSS var
             });
+        }
 
 
-            // Event Listeners for crossword buttons
-            checkButton.addEventListener('click', checkCrossword);
-            resetButton.addEventListener('click', resetCrossword);
-
-            return {
-                initGame: (initialDifficulty = 'easy') => {
-                    currentDifficulty = initialDifficulty;
-                    currentPuzzleIndex = 0;
-                    crosswordGameArea.classList.remove('hidden'); // Ensure game area is visible on init
-                    levelCompleteMessageDiv.classList.add('hidden'); // Ensure level complete message is hidden
-                    loadPuzzle(currentPuzzleIndex);
-                    crosswordMessageElement.textContent = ''; // Clear message on init
-                    currentClueInfoElement.textContent = '';
-                }
-            };
-        })();
-
-
-        // --- Initialization on Window Load ---
+        // --- Inicialización al Cargar la Ventana ---
         window.onload = function() {
-            showGamePortal(); // Show the game portal by default
+            showGamePortal(); // Muestra el portal de juegos por defecto
         };
     </script>
 </body>
