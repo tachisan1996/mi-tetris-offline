@@ -8,9 +8,13 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Bootstrap CSS for modals -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <!-- Importa Tone.js para la generación de sonido -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     
     <style>
-        /* Estilos generales para el portal */
+        /* Importa la fuente Inter de Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
         body {
             font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #a7d9f7 0%, #b2e6b2 100%); /* Degradado pastel */
@@ -300,6 +304,138 @@
         .progress-bar {
             transition: width 0.5s ease-in-out;
         }
+
+        /* Estilos para el nuevo juego "Juego Simple con Niveles" */
+        /* Redefinición de game-container para este juego específico */
+        #simple-game-section.game-screen {
+            background-color: #2d3748; /* Contenedor más claro */
+            padding: 2rem;
+            border-radius: 1rem; /* Esquinas más redondeadas */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.2); /* Sombra más profunda */
+            max-width: 800px; /* Ancho máximo para pantallas grandes */
+            position: relative;
+            justify-content: center; /* Centrar contenido */
+        }
+
+        .simple-game-stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0.5rem 1rem;
+            color: #e2e8f0; /* Texto claro */
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        #simpleGameCanvas {
+            background-color: #4a5568; /* Color del lienzo */
+            display: block;
+            border-radius: 0.75rem; /* Esquinas redondeadas para el lienzo */
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.3); /* Sombra interna para el lienzo */
+            width: 100%; /* Ajuste de ancho */
+            height: auto; /* Ajuste de altura */
+            aspect-ratio: 16 / 9; /* Mantener la proporción de aspecto */
+        }
+
+        .simple-game-control-panel {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem; /* Espacio entre botones */
+            flex-wrap: wrap; /* Permite que los botones se envuelvan en pantallas pequeñas */
+            justify-content: center;
+        }
+
+        .simple-game-control-panel button {
+            background-color: #48bb78; /* Verde esmeralda */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            font-size: 1.125rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            position: relative;
+            overflow: hidden;
+            background-image: linear-gradient(to right, #48bb78 0%, #38a169 100%);
+        }
+
+        .simple-game-control-panel button:hover {
+            background-color: #38a169; /* Verde más oscuro al pasar el ratón */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.15), 0 4px 6px -2px rgba(0, 0, 0, 0.1);
+        }
+
+        .simple-game-control-panel button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .simple-game-control-panel button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            transition: all 0.75s ease-out;
+            transform: translate(-50%, -50%) scale(0);
+            z-index: 0;
+        }
+
+        .simple-game-control-panel button:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .simple-game-message-box {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9); /* Fondo más oscuro para mensajes */
+            color: white;
+            padding: 2rem 3rem;
+            border-radius: 1rem;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: bold;
+            z-index: 100;
+            display: none; /* Oculto por defecto */
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+            border: 3px solid #63b3ed; /* Borde azul claro para mensajes */
+        }
+
+        .simple-game-message-box button {
+            margin-top: 1.5rem;
+            padding: 0.8rem 2rem;
+            font-size: 1.3rem;
+            background-image: linear-gradient(to right, #4299e1 0%, #3182ce 100%); /* Azul para el botón de aceptar */
+        }
+
+        @media (max-width: 640px) {
+            #simple-game-section.game-screen {
+                padding: 1rem;
+            }
+            .simple-game-control-panel button {
+                padding: 0.6rem 1.2rem;
+                font-size: 1rem;
+            }
+            .simple-game-stats {
+                font-size: 0.9rem;
+            }
+            .simple-game-message-box {
+                font-size: 1.2rem;
+                padding: 1.5rem 2rem;
+            }
+            .simple-game-message-box button {
+                font-size: 1rem;
+                padding: 0.6rem 1.2rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -322,6 +458,14 @@
                 <p>¡Pon a prueba tus conocimientos con este divertido crucigrama!</p>
                 <button class="play-button">Jugar</button>
             </div>
+
+            <!-- Tarjeta del Juego Simple con Niveles -->
+            <div class="game-card" data-game-id="simple-game">
+                <span class="game-icon">🏃</span> <!-- Icono de corredor/persona en movimiento -->
+                <h2>Juego Simple con Niveles</h2>
+                <p>¡Esquiva obstáculos y recolecta puntos en este juego de niveles!</p>
+                <button class="play-button">Jugar</button>
+            </div>
         </div>
     </div>
 
@@ -339,6 +483,7 @@
         <div class="button-container">
             <button id="tetris-start-button" class="game-button start-button">Iniciar Juego</button>
             <button id="tetris-pause-button" class="game-button pause-button hidden">Pausar</button>
+            <button id="tetris-mute-button" class="game-button pause-button">Silenciar Música</button> <!-- Botón de silenciar/reactivar -->
         </div>
         <button id="back-to-portal-tetris" class="back-button">Volver a Minijuegos</button>
     </div>
@@ -465,48 +610,73 @@
         <button id="back-to-portal-crossword" class="back-button">Volver a Minijuegos</button>
     </div>
 
+    <!-- Sección del Juego Simple con Niveles (Oculta por defecto) -->
+    <div id="simple-game-section" class="game-screen">
+        <h1 class="text-4xl md:text-5xl font-extrabold text-blue-600 mb-4 text-center">Juego Simple con Niveles</h1>
+        <div class="simple-game-stats">
+            <span>Nivel: <span id="simpleGameLevelDisplay">1</span></span>
+            <span>Puntuación: <span id="simpleGameScoreDisplay">0</span></span>
+            <span>Objetivos Nivel: <span id="simpleGameLevelScoreDisplay">0</span>/50</span>
+        </div>
+        <canvas id="simpleGameCanvas"></canvas>
+        <div class="simple-game-control-panel">
+            <button id="simpleGameStartButton">Iniciar Juego</button>
+            <button id="simpleGamePauseButton" style="background-image: linear-gradient(to right, #ecc94b 0%, #d69e2e 100%);">Pausa</button>
+            <button id="simpleGameStopButton" style="background-image: linear-gradient(to right, #ef4444 0%, #dc2626 100%);">Detener Juego</button>
+        </div>
+        <div id="simpleGameMessageBox" class="simple-game-message-box">
+            <p id="simpleGameMessageText"></p>
+            <button class="mt-4" style="background-image: linear-gradient(to right, #3b82f6 0%, #2563eb 100%);" id="simpleGameMessageBoxButton">Aceptar</button>
+        </div>
+        <button id="back-to-portal-simple-game" class="back-button">Volver a Minijuegos</button>
+    </div>
+
     <!-- Bootstrap JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 
     <script>
-        // --- Variables Globales de Navegación ---
+        // --- Global Navigation Variables ---
         const gamePortalSection = document.getElementById('game-portal-section');
         const tetrisGameSection = document.getElementById('tetris-game-section');
         const crosswordGameSection = document.getElementById('crossword-game-section');
+        const simpleGameSection = document.getElementById('simple-game-section'); // New game
 
-        const allGameSections = [tetrisGameSection, crosswordGameSection];
+        const allGameSections = [tetrisGameSection, crosswordGameSection, simpleGameSection];
 
-        // --- Funciones de Navegación ---
+        // --- Navigation Functions ---
         function showSection(sectionToShow) {
             allGameSections.forEach(section => {
-                section.style.display = 'none'; // Oculta todas las secciones de juego
+                section.style.display = 'none'; // Hide all game sections
             });
-            gamePortalSection.style.display = 'none'; // Oculta la sección del portal
+            gamePortalSection.style.display = 'none'; // Hide the portal section
 
-            // Muestra la sección seleccionada como flex para un buen diseño
+            // Display the selected section as flex for proper layout
             sectionToShow.style.display = 'flex';
         }
 
         function showGamePortal() {
             allGameSections.forEach(section => {
-                section.style.display = 'none'; // Oculta todas las secciones de juego
+                section.style.display = 'none'; // Hide all game sections
             });
-            gamePortalSection.style.display = 'flex'; // Muestra la sección del portal
+            gamePortalSection.style.display = 'flex'; // Show the portal section
         }
 
-        // --- Event Listeners para las Tarjetas de Juego (Portal) ---
+        // --- Event Listeners for Game Cards (Portal) ---
         document.querySelectorAll('.game-card .play-button').forEach(button => {
             button.addEventListener('click', (event) => {
+                // Start the audio context only when the user interacts for the first time
+                Tone.start();
+
                 const gameId = event.target.closest('.game-card').dataset.gameId;
                 if (gameId === 'tetris') {
                     showSection(tetrisGameSection);
-                    // Si Tetris ya está inicializado y el juego ha terminado o no ha comenzado, reinícialo.
+                    // If Tetris is already initialized and the game is over or not started, restart it.
                     if (window.tetrisGame && (window.tetrisGame.gameOver() || !window.tetrisGame.gameStarted())) {
                         window.tetrisGame.startGame();
                     } else if (window.tetrisGame && window.tetrisGame.isPaused()) {
-                         // Si está pausado, solo muestra la pantalla de juego pausada.
+                         // If paused, just show the paused game screen.
                     } else if (!window.tetrisGame) {
-                        // Si Tetris se carga por primera vez
+                        // If Tetris is loaded for the first time
                         document.getElementById('game-message').textContent = 'Pulsa "Iniciar Juego" para jugar';
                         document.getElementById('game-message').classList.remove('hidden');
                         document.getElementById('tetris-start-button').classList.remove('hidden');
@@ -514,69 +684,79 @@
                     }
                 } else if (gameId === 'crossword') {
                     showSection(crosswordGameSection);
-                    // Llama a la nueva función de inicio del crucigrama para mostrar la selección de nivel
-                    setupLevelButtons(); // Muestra los botones de selección de nivel del crucigrama
-                    gameAreaDiv.classList.add('hidden'); // Oculta el área de juego hasta que se elija un nivel
-                    levelSelectionDiv.classList.remove('hidden'); // Muestra la selección de nivel
+                    // Call the new crossword start function to show level selection
+                    setupLevelButtons(); // Show crossword level selection buttons
+                    gameAreaDiv.classList.add('hidden'); // Hide game area until a level is chosen
+                    levelSelectionDiv.classList.remove('hidden'); // Show level selection
+                } else if (gameId === 'simple-game') { // New game
+                    showSection(simpleGameSection);
+                    window.simpleGame.init(); // Initialize the simple game
                 }
             });
         });
 
-        // --- Botones de Volver al Portal ---
+        // --- Back to Portal Buttons ---
         document.getElementById('back-to-portal-tetris').addEventListener('click', () => {
             if (window.tetrisGame && !window.tetrisGame.gameOver()) {
-                // Pausa Tetris si se regresa al portal y el juego está activo
+                // Pause Tetris if returning to portal and game is active
                 if (!window.tetrisGame.isPaused()) {
                     window.tetrisGame.togglePause();
                 }
             }
+            window.tetrisGame.stopBackgroundMusic(); // Stop music when leaving Tetris
             showGamePortal();
         });
         document.getElementById('back-to-portal-crossword').addEventListener('click', () => {
-            levelSelectionDiv.classList.remove('hidden'); // Muestra los botones de selección de nivel
-            gameAreaDiv.classList.add('hidden'); // Oculta el área de juego
+            levelSelectionDiv.classList.remove('hidden'); // Show level selection buttons
+            gameAreaDiv.classList.add('hidden'); // Hide game area
+            showGamePortal();
+        });
+        document.getElementById('back-to-portal-simple-game').addEventListener('click', () => {
+            window.simpleGame.stopGame(); // Stop the simple game before returning
             showGamePortal();
         });
 
-        // --- LÓGICA DEL JUEGO TETRIS (Encapsulada) ---
+
+        // --- TETRIS GAME LOGIC (Encapsulated) ---
         window.tetrisGame = (() => {
             const canvas = document.getElementById('tetrisCanvas');
             const ctx = canvas.getContext('2d');
 
-            const COLS = 10; // Columnas del tablero
-            const ROWS = 20; // Filas del tablero
-            const BLOCK_SIZE = 28; // Tamaño de cada bloque en píxeles
+            const COLS = 10; // Board columns
+            const ROWS = 20; // Board rows
+            const BLOCK_SIZE = 28; // Size of each block in pixels
 
             canvas.width = COLS * BLOCK_SIZE;
             canvas.height = ROWS * BLOCK_SIZE;
 
-            // Paletas de colores pastel para diferentes niveles
+            // Pastel color palettes for different levels
             const COLOR_PALETTES = [
-                [ '#FF69B4', '#FFD700', '#00BFFF', '#32CD32', '#FF4500', '#4169E1', '#9932CC' ], // Pastel brillante
-                [ '#FF00FF', '#FFFF00', '#00FFFF', '#00FF00', '#FF0000', '#0000FF', '#8A2BE2' ], // Colores primarios
-                [ '#9ACD32', '#DAA520', '#6B8E23', '#5F9EA0', '#D2691E', '#8B4513', '#A0522D' ], // Tonos tierra
-                [ '#4B0082', '#1E90FF', '#BA55D3', '#20B2AA', '#FF1493', '#7B68EE', '#4682B4' ], // Tonos fríos
-                [ '#F08080', '#ADD8E6', '#90EE90', '#FFB6C1', '#DDA0DD', '#87CEEB', '#FFDAB9' ]  // Tonos cálidos y suaves
+                [ '#FF69B4', '#FFD700', '#00BFFF', '#32CD32', '#FF4500', '#4169E1', '#9932CC' ], // Bright pastel
+                [ '#FF00FF', '#FFFF00', '#00FFFF', '#00FF00', '#FF0000', '#0000FF', '#8A2BE2' ], // Primary colors
+                [ '#9ACD32', '#DAA520', '#6B8E23', '#5F9EA0', '#D2691E', '#8B4513', '#A0522D' ], // Earth tones
+                [ '#4B0082', '#1E90FF', '#BA55D3', '#20B2AA', '#FF1493', '#7B68EE', '#4682B4' ], // Cool tones
+                [ '#F08080', '#ADD8E6', '#90EE90', '#FFB6C1', '#DDA0DD', '#87CEEB', '#FFDAB9' ]  // Warm and soft tones
             ];
-            let COLORS = COLOR_PALETTES[0]; // Paleta de colores actual, inicia con la primera
+            let COLORS = COLOR_PALETTES[0]; // Current color palette, starts with the first one
 
-            let board = []; // El tablero de juego
-            let currentPiece; // La pieza que está cayendo actualmente
-            let nextPiece; // La siguiente pieza que caerá
-            let score = 0; // Puntuación actual
-            let gameOver = false; // Estado del juego (true si game over)
-            let gameLoopId; // ID del ciclo de juego para requestAnimationFrame
-            let lastUpdateTime = 0; // Marca de tiempo de la última actualización para controlar la caída
+            let board = []; // Game board
+            let currentPiece; // The piece currently falling
+            let nextPiece; // The next piece to fall
+            let score = 0; // Current score
+            let gameOver = false; // Game state (true if game over)
+            let gameLoopId; // ID of the game loop for requestAnimationFrame
+            let lastUpdateTime = 0; // Timestamp of the last update to control falling
 
-            let level = 1; // Nivel actual
-            let linesClearedTotal = 0; // Total de líneas eliminadas
-            const BASE_FALL_INTERVAL = 600; // Intervalo de caída base (ms)
-            let currentFallInterval = BASE_FALL_INTERVAL; // Intervalo de caída actual
-            let nextLevelScoreThreshold = 500; // Puntuación para el siguiente nivel
-            let isPaused = false; // Estado de pausa
-            let gameStarted = false; // Indica si el juego ha comenzado
+            let level = 1; // Current level
+            let linesClearedTotal = 0; // Total lines cleared
+            const BASE_FALL_INTERVAL = 600; // Base fall interval (ms)
+            let currentFallInterval = BASE_FALL_INTERVAL; // Current fall interval
+            let nextLevelScoreThreshold = 500; // Score for the next level
+            let isPaused = false; // Pause state
+            let gameStarted = false; // Indicates if the game has started
+            let isMuted = false; // Mute state for background music
 
-            // Elementos del DOM para actualizar la UI
+            // DOM elements to update the UI
             const scoreDisplay = document.getElementById('score');
             const levelDisplay = document.getElementById('level');
             const gameMessage = document.getElementById('game-message');
@@ -585,8 +765,45 @@
             const levelUpMessageElement = document.getElementById('level-up-message');
             const startButton = document.getElementById('tetris-start-button');
             const pauseButton = document.getElementById('tetris-pause-button');
+            const muteButton = document.getElementById('tetris-mute-button'); // New mute button
 
-            // Formas de los Tetrominós y sus colores iniciales
+            // --- Tone.js Synths for Tetris ---
+            const lockSynth = new Tone.MembraneSynth().toDestination(); // For piece locking
+            const lineClearSynth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.05, release: 0.1 }
+            }).toDestination(); // For line clears
+            const rotateSynth = new Tone.Synth({
+                oscillator: { type: "sine" },
+                envelope: { attack: 0.001, decay: 0.05, sustain: 0.01, release: 0.05 }
+            }).toDestination(); // For rotation
+            const gameOverSynth = new Tone.NoiseSynth({
+                noise: { type: 'pink' },
+                envelope: { attack: 0.01, decay: 0.5, sustain: 0, release: 1 }
+            }).toDestination(); // For game over
+
+            // Background music synth and sequence for Tetris (Sailor Moon Opening)
+            const backgroundMusicSynth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "sawtooth" },
+                envelope: { attack: 0.02, decay: 0.3, sustain: 0.1, release: 0.5 },
+                volume: -10 // Adjust volume to not overpower sound effects
+            }).toDestination();
+
+            // Sailor Moon Opening (simplified instrumental melody)
+            const sailorMoonMelody = new Tone.Sequence((time, note) => {
+                backgroundMusicSynth.triggerAttackRelease(note, "8n", time);
+            }, [
+                "E4", "F#4", "G#4", "A4", "B4", "C#5", "B4", "A4", "G#4", "F#4",
+                "E4", "F#4", "G#4", "A4", "B4", "C#5", "D5", "E5", "D5", "C#5",
+                "B4", "A4", "G#4", "F#4", "E4", "F#4", "G#4", "A4", "B4", "C#5",
+                "B4", "A4", "G#4", "F#4", "E4", "F#4", "G#4", "A4", "B4", "C#5",
+                "D5", "E5", "D5", "C#5", "B4", "A4", "G#4", "F#4"
+            ], "8n"); // Each note lasts an 8th note
+
+            sailorMoonMelody.loop = true; // Loop the melody
+            sailorMoonMelody.bpm = 120; // Set BPM for the melody
+
+            // Tetromino shapes and their initial colors
             const TETROMINO_SHAPES = {
                 'I': { shape: [[1, 1, 1, 1]], colorIndex: 0 },
                 'O': { shape: [[1, 1], [1, 1]], colorIndex: 1 },
@@ -597,26 +814,26 @@
                 'L': { shape: [[0, 0, 1], [1, 1, 1]], colorIndex: 6 }
             };
 
-            // Clase para representar una pieza de Tetris
+            // Class to represent a Tetris piece
             class Piece {
                 constructor(shapeType) {
                     const { shape, colorIndex } = TETROMINO_SHAPES[shapeType];
                     this.shape = shape;
                     this.color = COLORS[colorIndex];
-                    // Posiciona la pieza en el centro superior del tablero
+                    // Position the piece in the top center of the board
                     this.x = Math.floor(COLS / 2) - Math.floor(shape[0].length / 2);
                     this.y = 0;
                     this.shapeType = shapeType;
                 }
 
-                // Dibuja la pieza en el canvas
+                // Draws the piece on the canvas
                 draw() {
                     this.shape.forEach((row, r) => {
                         row.forEach((value, c) => {
-                            if (value > 0) { // Si la celda de la forma no está vacía
+                            if (value > 0) { // If the shape cell is not empty
                                 ctx.fillStyle = this.color;
                                 ctx.fillRect(this.x * BLOCK_SIZE + c * BLOCK_SIZE, this.y * BLOCK_SIZE + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
-                                ctx.strokeStyle = '#fff'; // Borde blanco
+                                ctx.strokeStyle = '#fff'; // White border
                                 ctx.lineWidth = 1;
                                 ctx.strokeRect(this.x * BLOCK_SIZE + c * BLOCK_SIZE, this.y * BLOCK_SIZE + r * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
                             }
@@ -624,37 +841,38 @@
                     });
                 }
 
-                // Mueve la pieza en el tablero (dx, dy son los cambios en x e y)
+                // Moves the piece on the board (dx, dy are changes in x and y)
                 move(dx, dy) {
                     if (!this.collision(dx, dy, this.shape)) {
                         this.x += dx;
                         this.y += dy;
-                        return true; // Movimiento exitoso
+                        return true; // Successful move
                     }
-                    return false; // Colisión detectada
+                    return false; // Collision detected
                 }
 
-                // Rota la pieza
+                // Rotates the piece
                 rotate() {
-                    // Función para transponer una matriz (cambiar filas por columnas)
+                    // Function to transpose a matrix (swap rows and columns)
                     const transpose = (matrix) => matrix[0].map((_, i) => matrix.map(row => row[i]));
-                    // Función para invertir las filas de una matriz
+                    // Function to reverse the rows of a matrix
                     const reverseRows = (matrix) => matrix.map(row => [...row].reverse());
 
                     let rotatedShape = transpose(this.shape);
-                    // Reglas de rotación específicas para algunas piezas
+                    // Specific rotation rules for some pieces
                     if (this.shapeType === 'I' || this.shapeType === 'S' || this.shapeType === 'Z') {
                         rotatedShape = reverseRows(rotatedShape);
                     } else {
                         rotatedShape = rotatedShape.reverse();
                     }
 
-                    // Intenta rotar si no hay colisión
+                    // Try to rotate if there is no collision
                     if (!this.collision(0, 0, rotatedShape)) {
                         this.shape = rotatedShape;
+                        rotateSynth.triggerAttackRelease("C4", "16n"); // Play rotation sound
                         return true;
                     }
-                    // Implementación de "Wall Kick" (desplazamiento para evitar colisiones al rotar)
+                    // Implement "Wall Kick" (offset to avoid collisions when rotating)
                     const kicks = [[0, 0], [-1, 0], [1, 0], [0, -1], [-1, -1], [1, -1]];
                     for (let i = 0; i < kicks.length; i++) {
                         const [dx, dy] = kicks[i];
@@ -662,13 +880,14 @@
                             this.x += dx;
                             this.y += dy;
                             this.shape = rotatedShape;
+                            rotateSynth.triggerAttackRelease("C4", "16n"); // Play rotation sound
                             return true;
                         }
                     }
-                    return false; // No se pudo rotar
+                    return false; // Could not rotate
                 }
 
-                // Verifica si la pieza colisiona con los límites del tablero o con otras piezas
+                // Checks if the piece collides with board boundaries or other pieces
                 collision(dx, dy, newShape) {
                     for (let r = 0; r < newShape.length; r++) {
                         for (let c = 0; c < newShape[r].length; c++) {
@@ -676,88 +895,98 @@
                                 let newX = this.x + c + dx;
                                 let newY = this.y + r + dy;
 
-                                // Comprueba colisiones con los límites del tablero o piezas existentes
+                                // Check collisions with board boundaries or existing pieces
                                 if (newX < 0 || newX >= COLS || newY >= ROWS || (newY >= 0 && board[newY][newX] !== 'empty')) {
                                     return true;
                                 }
                             }
-                        }
+                        } // Fixed: Missing closing brace for inner loop
                     }
-                    return false; // No hay colisión
+                    return false; // No collision
                 }
 
-                // Fija la pieza al tablero cuando choca con algo
+                // Locks the piece to the board when it hits something
                 lock() {
                     this.shape.forEach((row, r) => {
                         row.forEach((value, c) => {
                             if (value > 0) {
                                 let boardX = this.x + c;
                                 let boardY = this.y + r;
-                                // Si la pieza se bloquea por encima del tablero, es Game Over
+                                // If the piece locks above the board, it's Game Over
                                 if (boardY < 0) {
                                     gameOver = true;
                                     gameMessage.textContent = '¡Game Over!';
                                     gameMessage.classList.remove('hidden');
-                                    startButton.textContent = "Reiniciar Juego"; // Cambia el texto del botón
+                                    startButton.textContent = "Reiniciar Juego"; // Change button text
                                     startButton.classList.remove('hidden');
                                     pauseButton.classList.add('hidden');
-                                    cancelAnimationFrame(gameLoopId); // Detiene el ciclo de juego
+                                    cancelAnimationFrame(gameLoopId); // Stop game loop
+                                    gameOverSynth.triggerAttackRelease("4n"); // Play game over sound
+                                    sailorMoonMelody.stop(); // Stop background music
                                     return;
                                 }
-                                board[boardY][boardX] = this.color; // Asigna el color de la pieza a la celda del tablero
+                                board[boardY][boardX] = this.color; // Assign piece color to board cell
                             }
                         });
                     });
-                    this.clearLines(); // Intenta limpiar líneas
-                    this.generateNewPiece(); // Genera una nueva pieza
+                    lockSynth.triggerAttackRelease("C3", "16n"); // Play lock sound
+                    this.clearLines(); // Try to clear lines
+                    this.generateNewPiece(); // Generate a new piece
                 }
 
-                // Elimina las líneas completas del tablero
+                // Clears complete lines from the board
                 clearLines() {
                     let linesCleared = 0;
                     for (let r = ROWS - 1; r >= 0; r--) {
-                        // Si la línea está completa
+                        // If the line is complete
                         if (board[r].every(cell => cell !== 'empty')) {
                             linesCleared++;
-                            board.splice(r, 1); // Elimina la línea
-                            board.unshift(Array(COLS).fill('empty')); // Añade una nueva línea vacía en la parte superior
-                            r++; // Vuelve a comprobar la misma fila, ya que las de arriba se han movido hacia abajo
+                            board.splice(r, 1); // Remove the line
+                            board.unshift(Array(COLS).fill('empty')); // Add a new empty line at the top
+                            r++; // Recheck the same row, as those above have moved down
                         }
                     }
                     if (linesCleared > 0) {
-                        score += linesCleared * 100 * level; // Aumenta la puntuación
+                        score += linesCleared * 100 * level; // Increase score
                         scoreDisplay.textContent = score;
                         linesClearedTotal += linesCleared;
 
-                        // Lógica para subir de nivel
+                        // Play line clear sound
+                        const notes = ["C4", "E4", "G4"];
+                        if (linesCleared === 2) notes.push("C5");
+                        if (linesCleared === 3) notes.push("E5");
+                        if (linesCleared === 4) notes.push("G5", "C6");
+                        lineClearSynth.triggerAttackRelease(notes, "8n");
+
+                        // Logic to level up
                         if (level < 10 && score >= nextLevelScoreThreshold) {
                             level++;
                             levelDisplay.textContent = level;
-                            nextLevelScoreThreshold += 1000; // Aumenta el umbral para el siguiente nivel
-                            currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 75)); // Acelera la caída
-                            isPaused = true; // Pausa el juego temporalmente para mostrar el mensaje de nivel
+                            nextLevelScoreThreshold += 1000; // Increase threshold for next level
+                            currentFallInterval = Math.max(50, BASE_FALL_INTERVAL - (level * 75)); // Accelerate fall
+                            isPaused = true; // Temporarily pause the game to show level message
                             pauseButton.textContent = "Reanudar";
-                            cancelAnimationFrame(gameLoopId); // Detiene la animación actual
-                            initBoard(); // Reinicia el tablero (para limpiar cualquier "fantasma" de piezas)
-                            drawBoard(); // Redibuja el tablero
-                            COLORS = COLOR_PALETTES[(level -1) % COLOR_PALETTES.length]; // Cambia la paleta de colores
-                            displayLevelUpMessage(); // Muestra un mensaje de subida de nivel
+                            cancelAnimationFrame(gameLoopId); // Stop current animation
+                            initBoard(); // Reset the board (to clear any "ghost" pieces)
+                            drawBoard(); // Redraw the board
+                            COLORS = COLOR_PALETTES[(level -1) % COLOR_PALETTES.length]; // Change color palette
+                            displayLevelUpMessage(); // Show a level up message
                         }
 
-                        // Muestra mensajes de combo
+                        // Show combo messages
                         if (linesCleared === 2) { displayComboMessage('¡Doble!'); }
                         else if (linesCleared === 3) { displayComboMessage('¡Triple!'); }
                         else if (linesCleared === 4) { displayComboMessage('¡Tetris!'); }
                     }
                 }
 
-                // Genera la siguiente pieza y la pieza actual
+                // Generates the next piece and the current piece
                 generateNewPiece() {
-                    currentPiece = nextPiece; // La siguiente pieza se convierte en la actual
-                    nextPiece = this.randomPiece(); // Genera una nueva siguiente pieza
-                    this.drawNextPiece(); // Dibuja la siguiente pieza en su área de visualización
+                    currentPiece = nextPiece; // The next piece becomes the current one
+                    nextPiece = this.randomPiece(); // Generate a new next piece
+                    this.drawNextPiece(); // Draw the next piece in its display area
 
-                    // Comprueba si la nueva pieza colisiona al aparecer (Game Over inmediato)
+                    // Check if the new piece collides on appearance (immediate Game Over)
                     if (currentPiece.collision(0, 0, currentPiece.shape)) {
                         gameOver = true;
                         gameMessage.textContent = '¡Game Over!';
@@ -765,23 +994,25 @@
                         startButton.textContent = "Reiniciar Juego";
                         startButton.classList.remove('hidden');
                         pauseButton.classList.add('hidden');
-                        cancelAnimationFrame(gameLoopId); // Detiene el ciclo de juego
+                        cancelAnimationFrame(gameLoopId); // Stop game loop
+                        gameOverSynth.triggerAttackRelease("4n"); // Play game over sound
+                        sailorMoonMelody.stop(); // Stop background music
                     }
                 }
 
-                // Crea una pieza de Tetris aleatoria
+                // Creates a random Tetris piece
                 randomPiece() {
                     const types = Object.keys(TETROMINO_SHAPES);
                     const randType = types[Math.floor(Math.random() * types.length)];
                     return new Piece(randType);
                 }
 
-                // Dibuja la siguiente pieza en su contenedor
+                // Draws the next piece in its container
                 drawNextPiece() {
-                    nextPieceDisplay.innerHTML = ''; // Limpia el contenedor
-                    const tempCanvas = document.createElement('canvas'); // Crea un canvas temporal
+                    nextPieceDisplay.innerHTML = ''; // Clear the container
+                    const tempCanvas = document.createElement('canvas'); // Create a temporary canvas
                     const tempCtx = tempCanvas.getContext('2d');
-                    tempCanvas.width = 4 * BLOCK_SIZE; // Tamaño para la vista previa
+                    tempCanvas.width = 4 * BLOCK_SIZE; // Size for preview
                     tempCanvas.height = 4 * BLOCK_SIZE;
                     tempCanvas.style.display = 'inline-block';
                     tempCanvas.style.verticalAlign = 'middle';
@@ -805,16 +1036,16 @@
                 }
             }
 
-            // Inicializa el tablero con celdas vacías
+            // Initializes the board with empty cells
             function initBoard() {
                 for (let r = 0; r < ROWS; r++) {
                     board[r] = Array(COLS).fill('empty');
                 }
             }
 
-            // Dibuja el tablero de juego (piezas fijas)
+            // Draws the game board (fixed pieces)
             function drawBoard() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height); // Limpia el canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
                 for (let r = 0; r < ROWS; r++) {
                     for (let c = 0; c < COLS; c++) {
                         if (board[r][c] !== 'empty') {
@@ -828,16 +1059,16 @@
                 }
             }
 
-            // Muestra un mensaje de combo (Doble, Triple, Tetris)
+            // Shows a combo message (Double, Triple, Tetris)
             function displayComboMessage(message) {
                 comboMessageElement.textContent = message;
                 comboMessageElement.classList.add('show');
                 setTimeout(() => {
                     comboMessageElement.classList.remove('show');
-                }, 700); // El mensaje desaparece después de 0.7 segundos
+                }, 700); // Message disappears after 0.7 seconds
             }
 
-            // Chistes para cuando el jugador sube de nivel
+            // Jokes for when the player levels up
             const levelUpJokes = [
                 "¿Qué le dice un Tetris a otro? ¡Deja de apilarte, que me ahogo!",
                 "¿Por qué el Tetris nunca gana en un debate? ¡Siempre se queda bloqueado!",
@@ -856,97 +1087,112 @@
                 "¿Por qué el perro no puede jugar a las cartas? Porque siempre se sienta sobre las barajas."
             ];
 
-            // Muestra un mensaje y un chiste al subir de nivel
+            // Shows a message and a joke when leveling up
             function displayLevelUpMessage() {
                 const randomIndex = Math.floor(Math.random() * levelUpJokes.length);
                 levelUpMessageElement.innerHTML = `¡Nivel ${level}! <br>` + levelUpJokes[randomIndex];
                 levelUpMessageElement.classList.add('show');
             }
 
-            // Bucle principal del juego
+            // Main game loop
             function gameLoop(currentTime) {
-                gameLoopId = requestAnimationFrame(gameLoop); // Solicita el siguiente fotograma de animación
-                if (gameOver || isPaused || !gameStarted) return; // Si el juego está terminado, pausado o no ha comenzado, no hacer nada
+                gameLoopId = requestAnimationFrame(gameLoop); // Request the next animation frame
+                if (gameOver || isPaused || !gameStarted) return; // If the game is over, paused or not started, do nothing
 
-                // Controla la caída de la pieza según el intervalo de tiempo
+                // Control piece falling based on time interval
                 if (currentTime - lastUpdateTime > currentFallInterval) {
-                    if (!currentPiece.move(0, 1)) { // Intenta mover la pieza hacia abajo
-                        currentPiece.lock(); // Si no puede, la bloquea
+                    if (!currentPiece.move(0, 1)) { // Try to move the piece down
+                        currentPiece.lock(); // If it can't, lock it
                     }
-                    lastUpdateTime = currentTime; // Actualiza el tiempo de la última caída
+                    lastUpdateTime = currentTime; // Update the last fall time
                 }
 
-                drawBoard(); // Dibuja el tablero
-                currentPiece.draw(); // Dibuja la pieza que está cayendo
+                drawBoard(); // Draw the board
+                currentPiece.draw(); // Draw the falling piece
             }
 
-            // Inicia o reinicia el juego
+            // Starts or restarts the game
             function startGame() {
-                initBoard(); // Inicializa el tablero
-                score = 0; level = 1; linesClearedTotal = 0; // Reinicia puntuación, nivel y líneas
-                currentFallInterval = BASE_FALL_INTERVAL; nextLevelScoreThreshold = 500; // Reinicia intervalos y umbrales
-                isPaused = false; gameOver = false; gameStarted = true; // Reinicia estados del juego
+                initBoard(); // Initialize the board
+                score = 0; level = 1; linesClearedTotal = 0; // Reset score, level and lines
+                currentFallInterval = BASE_FALL_INTERVAL; nextLevelScoreThreshold = 500; // Reset intervals and thresholds
+                isPaused = false; gameOver = false; gameStarted = true; // Reset game states
 
-                scoreDisplay.textContent = score; // Actualiza UI
+                scoreDisplay.textContent = score; // Update UI
                 levelDisplay.textContent = level;
-                gameMessage.classList.add('hidden'); // Oculta mensajes
+                gameMessage.classList.add('hidden'); // Hide messages
                 comboMessageElement.classList.remove('show');
                 levelUpMessageElement.classList.remove('show');
 
-                startButton.classList.add('hidden'); // Oculta el botón de inicio
-                pauseButton.classList.remove('hidden'); // Muestra el botón de pausa
-                pauseButton.textContent = "Pausar"; // Asegura que el texto del botón sea "Pausar"
-                COLORS = COLOR_PALETTES[0]; // Restablecer paleta al iniciar nuevo juego
+                startButton.classList.add('hidden'); // Hide start button
+                pauseButton.classList.remove('hidden'); // Show pause button
+                pauseButton.textContent = "Pausar"; // Ensure button text is "Pausar"
+                muteButton.textContent = "Silenciar Música"; // Reset mute button text
+                isMuted = false; // Reset mute state
+                
+                COLORS = COLOR_PALETTES[0]; // Reset palette when starting a new game
 
-                // Genera la primera pieza y la siguiente
+                // Generate the first piece and the next one
                 currentPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
                 nextPiece = new Piece(Object.keys(TETROMINO_SHAPES)[Math.floor(Math.random() * Object.keys(TETROMINO_SHAPES).length)]);
-                currentPiece.drawNextPiece(); // Dibuja la vista previa de la siguiente pieza
-                lastUpdateTime = performance.now(); // Establece el tiempo de inicio para el bucle de caída
+                currentPiece.drawNextPiece(); // Draw the next piece preview
+                lastUpdateTime = performance.now(); // Set the start time for the fall loop
 
-                if (gameLoopId) { cancelAnimationFrame(gameLoopId); } // Cancela cualquier bucle anterior
-                gameLoopId = requestAnimationFrame(gameLoop); // Inicia el bucle de juego
+                if (gameLoopId) { cancelAnimationFrame(gameLoopId); } // Cancel any previous loop
+                gameLoopId = requestAnimationFrame(gameLoop); // Start the game loop
+
+                // Start background music only if not muted
+                if (!isMuted) {
+                    Tone.Transport.start();
+                    sailorMoonMelody.start();
+                }
             }
 
-            // Manejo de eventos de teclado
+            // Stops background music
+            function stopBackgroundMusic() {
+                sailorMoonMelody.stop();
+                Tone.Transport.stop();
+            }
+
+            // Keyboard event handling
             document.addEventListener('keydown', e => {
-                if (!gameStarted) return; // No hace nada si el juego no ha comenzado
+                if (!gameStarted) return; // Do nothing if the game has not started
                 if (gameOver) {
-                    if (e.key === 'Enter') { startGame(); } // Reinicia el juego si es Game Over y se presiona Enter
+                    if (e.key === 'Enter') { startGame(); } // Restart the game if Game Over and Enter is pressed
                     return;
                 }
-                if (isPaused && e.key !== 'p' && e.key !== 'P') return; // Solo permite pausar/reanudar si está pausado
+                if (isPaused && e.key !== 'p' && e.key !== 'P') return; // Only allow pause/resume if paused
 
                 switch (e.key) {
-                    case 'ArrowLeft': currentPiece.move(-1, 0); break; // Mover a la izquierda
-                    case 'ArrowRight': currentPiece.move(1, 0); break; // Mover a la derecha
-                    case 'ArrowDown': currentPiece.move(0, 1); break; // Mover hacia abajo (caída suave)
-                    case 'ArrowUp': currentPiece.rotate(); break; // Rotar
-                    case ' ': while (currentPiece.move(0, 1)); currentPiece.lock(); break; // Caída instantánea (hard drop)
-                    case 'p': case 'P': togglePause(); break; // Pausar/Reanudar
+                    case 'ArrowLeft': currentPiece.move(-1, 0); break; // Move left
+                    case 'ArrowRight': currentPiece.move(1, 0); break; // Move right
+                    case 'ArrowDown': currentPiece.move(0, 1); break; // Move down (soft drop)
+                    case 'ArrowUp': currentPiece.rotate(); break; // Rotate
+                    case ' ': while (currentPiece.move(0, 1)); currentPiece.lock(); break; // Instant drop (hard drop)
+                    case 'p': case 'P': togglePause(); break; // Pause/Resume
                 }
                 if (!isPaused) {
-                    drawBoard(); // Redibuja el tablero después del movimiento
-                    currentPiece.draw(); // Redibuja la pieza
+                    drawBoard(); // Redraw the board after movement
+                    currentPiece.draw(); // Redraw the piece
                 }
             });
 
-            // Variables para el control táctil
+            // Variables for touch control
             let touchStartX = 0;
             let touchStartY = 0;
-            const tapThreshold = 8; // Umbral para reconocer un toque
-            const swipeThreshold = 20; // Umbral para reconocer un deslizamiento
-            const hardDropSwipeThreshold = 70; // Umbral para reconocer un deslizamiento largo para hard drop
+            const tapThreshold = 8; // Threshold to recognize a tap
+            const swipeThreshold = 20; // Threshold to recognize a swipe
+            const hardDropSwipeThreshold = 70; // Threshold to recognize a long swipe for hard drop
 
-            // Manejo de eventos táctiles
+            // Touch event handling
             canvas.addEventListener('touchstart', e => {
-                e.preventDefault(); // Evita el scroll predeterminado del navegador
+                e.preventDefault(); // Prevent default browser scrolling
                 if (!gameStarted || gameOver || isPaused) return;
                 touchStartX = e.touches[0].clientX;
                 touchStartY = e.touches[0].clientY;
             });
 
-            canvas.addEventListener('touchmove', e => { e.preventDefault(); }); // Evita el scroll durante el movimiento táctil
+            canvas.addEventListener('touchmove', e => { e.preventDefault(); }); // Prevent scrolling during touch move
 
             canvas.addEventListener('touchend', e => {
                 if (!gameStarted || gameOver || isPaused) return;
@@ -957,70 +1203,94 @@
                 const isTap = Math.abs(deltaX) < tapThreshold && Math.abs(deltaY) < tapThreshold;
 
                 if (isTap) {
-                    currentPiece.rotate(); // Un toque simple rota la pieza
+                    currentPiece.rotate(); // A simple tap rotates the piece
                 } else {
                     if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > swipeThreshold) {
-                        // Deslizamiento horizontal
-                        if (deltaX < 0) { currentPiece.move(-1, 0); } // Deslizar izquierda
-                        else { currentPiece.move(1, 0); } // Deslizar derecha
+                        // Horizontal swipe
+                        if (deltaX < 0) { currentPiece.move(-1, 0); } // Swipe left
+                        else { currentPiece.move(1, 0); } // Swipe right
                     } else if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > swipeThreshold) {
-                        // Deslizamiento vertical
+                        // Vertical swipe
                         if (deltaY > 0) {
                             if (Math.abs(deltaY) > hardDropSwipeThreshold) {
-                                while (currentPiece.move(0, 1)); // Caída instantánea si el deslizamiento es largo
+                                while (currentPiece.move(0, 1)); // Instant drop if swipe is long
                                 currentPiece.lock();
                             } else {
-                                currentPiece.move(0, 1); // Caída suave si el deslizamiento es corto
+                                currentPiece.move(0, 1); // Soft drop if swipe is short
                             }
                         }
                     }
                 }
-                drawBoard(); // Redibuja el tablero
-                currentPiece.draw(); // Redibuja la pieza
+                drawBoard(); // Redraw the board
+                currentPiece.draw(); // Redraw the piece
             });
 
-            // Alterna el estado de pausa del juego
+            // Toggles the game's pause state
             function togglePause() {
-                if (!gameStarted || gameOver) return; // No se puede pausar si el juego no ha comenzado o ha terminado
-                isPaused = !isPaused; // Invierte el estado de pausa
+                if (!gameStarted || gameOver) return; // Cannot pause if game has not started or is over
+                isPaused = !isPaused; // Invert pause state
                 if (isPaused) {
-                    pauseButton.textContent = "Reanudar"; // Cambia el texto del botón
-                    gameMessage.textContent = '¡Juego Pausado!'; // Muestra mensaje de pausa
+                    pauseButton.textContent = "Reanudar"; // Change button text
+                    gameMessage.textContent = '¡Juego Pausado!'; // Show pause message
                     gameMessage.classList.remove('hidden');
-                    cancelAnimationFrame(gameLoopId); // Detiene el bucle de animación
+                    cancelAnimationFrame(gameLoopId); // Stop animation loop
+                    sailorMoonMelody.stop(); // Pause background music
                 } else {
-                    pauseButton.textContent = "Pausar"; // Cambia el texto del botón
-                    gameMessage.classList.add('hidden'); // Oculta el mensaje de pausa
-                    levelUpMessageElement.classList.remove('show'); // Oculta el mensaje de nivel (si estaba visible)
-                    lastUpdateTime = performance.now(); // Restablece el tiempo para la caída correcta
-                    gameLoop(performance.now()); // Reanuda el bucle de juego
+                    pauseButton.textContent = "Pausar"; // Change button text
+                    gameMessage.classList.add('hidden'); // Hide pause message
+                    levelUpMessageElement.classList.remove('show'); // Hide level message (if visible)
+                    lastUpdateTime = performance.now(); // Reset time for correct fall
+                    gameLoop(performance.now()); // Resume game loop
+                    if (!isMuted) { // Only resume music if not globally muted
+                        sailorMoonMelody.start(); // Resume background music
+                    }
                 }
             }
 
-            // Event listener para el botón de pausa
+            // Toggles the music mute state
+            function toggleMute() {
+                isMuted = !isMuted; // Invert mute state
+                if (isMuted) {
+                    muteButton.textContent = "Activar Música"; // Change button text
+                    sailorMoonMelody.stop(); // Stop background music
+                    Tone.Transport.stop(); // Stop Tone.js transport
+                } else {
+                    muteButton.textContent = "Silenciar Música"; // Change button text
+                    if (gameStarted && !gameOver && !isPaused) { // Only start music if game is active
+                        Tone.Transport.start();
+                        sailorMoonMelody.start(); // Start background music
+                    }
+                }
+            }
+
+            // Event listener for the pause button
             pauseButton.addEventListener('click', togglePause);
 
-            // Event listener para el botón de inicio/reinicio
+            // Event listener for the start/restart button
             startButton.addEventListener('click', () => {
                 if (gameOver || !gameStarted) {
-                    startGame(); // Inicia un nuevo juego si es Game Over o no ha comenzado
+                    startGame(); // Start a new game if Game Over or not started
                 } else if (isPaused) {
-                    togglePause(); // Reanuda el juego si está pausado
+                    togglePause(); // Resume game if paused
                 }
             });
 
-            // Funciones públicas del módulo para acceder desde fuera
+            // Event listener for the mute button
+            muteButton.addEventListener('click', toggleMute);
+
+            // Public module functions for external access
             return {
                 startGame: startGame,
                 togglePause: togglePause,
                 isPaused: () => isPaused,
                 gameOver: () => gameOver,
-                gameStarted: () => gameStarted
+                gameStarted: () => gameStarted,
+                stopBackgroundMusic: stopBackgroundMusic // Expose function to stop music
             };
         })();
 
 
-        // --- LÓGICA DEL JUEGO DE CRUCIGRAMA (NUEVA IMPLEMENTACIÓN) ---
+        // --- CROSSWORD GAME LOGIC ---
         // Core variables and constants
         let _answers = [];
         let _vword = "";
@@ -1039,12 +1309,24 @@
         const crosswordCounter = document.getElementById('crossword-counter');
         const nextCrosswordBtn = document.getElementById('next-crossword-btn');
         const restartGameBtn = document.getElementById('restart-game-btn');
-        const revealLetterBtn = document.getElementById('reveal-letter-btn'); // Renamed from showAnswersBtn
+        const revealLetterBtn = document.getElementById('reveal-letter-btn');
         const menuBtn = document.getElementById('menu-btn');
         const configBtn = document.getElementById('config-btn');
         const progressBar = document.querySelector('.progress-bar');
         const messageDisplay = document.getElementById('message-display');
         const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+
+        // --- Tone.js Synths for Crossword ---
+        const correctSynth = new Tone.Synth().toDestination();
+        const wrongSynth = new Tone.NoiseSynth({
+            noise: { type: 'brown' },
+            envelope: { attack: 0.005, decay: 0.1, sustain: 0.01, release: 0.1 }
+        }).toDestination();
+        const revealSynth = new Tone.FMSynth().toDestination();
+        const crosswordCompleteSynth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "square" },
+            envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.3 }
+        }).toDestination();
 
         // Game state variables
         let currentLevel = '';
@@ -1058,7 +1340,7 @@
         // Data structure for crosswords
         const crucigramas = {
             "facil": {
-                // Ancho: 10, Alto: 10, Palabras de 5 a 10 letras
+                // Width: 10, Height: 10, Words from 5 to 10 letters
                 "Crucigrama 1 F": {
                     "ancho": 10, "alto": 10,
                     "vword": "CULTURA", // 7 letters
@@ -1161,7 +1443,7 @@
                 }
             },
             "medio": {
-                // Ancho: 20, Alto: 20, Palabras hasta 15 letras
+                // Width: 20, Height: 20, Words up to 15 letters
                 "Crucigrama 1 M": {
                     "ancho": 20, "alto": 20,
                     "vword": "HISTORIA", // 8 letters
@@ -1288,7 +1570,7 @@
                 }
             },
             "dificil": {
-                // Ancho: 20, Alto: 20, Palabras más difíciles
+                // Width: 20, Height: 20, More difficult words
                 "Crucigrama 1 D": {
                     "ancho": 20, "alto": 20,
                     "vword": "PARADIGMA", // 9 letters
@@ -1573,9 +1855,11 @@
             if (enteredChar === correctChar) {
                 input.classList.remove('wrong-answer');
                 input.classList.add('correct-answer');
+                correctSynth.triggerAttackRelease("C5", "16n"); // Play correct sound
             } else {
                 input.classList.remove('correct-answer');
                 input.classList.add('wrong-answer');
+                wrongSynth.triggerAttackRelease("8n"); // Play wrong sound
             }
 
             updateProgressBar();
@@ -1788,6 +2072,7 @@
                 showMessage('¡Crucigrama Completado!', 'text-green-600');
                 successModal.show(); // Show Bootstrap success modal
                 updateScore(100); // Award points for completion
+                crosswordCompleteSynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "1n"); // Play completion sound
                 nextCrosswordBtn.classList.remove('hidden'); // Show next crossword button
                 restartGameBtn.classList.add('hidden'); // Hide restart button
                 revealLetterBtn.classList.add('hidden'); // Hide reveal letter button
@@ -1853,8 +2138,8 @@
             restartGameBtn.classList.remove('hidden'); // Show restart button
             revealLetterBtn.classList.remove('hidden'); // Show reveal letter button
 
-            levelSelectionDiv.classList.add('hidden'); // Oculta la selección de nivel
-            gameAreaDiv.classList.remove('hidden'); // Muestra el área de juego
+            levelSelectionDiv.classList.add('hidden'); // Hide level selection
+            gameAreaDiv.classList.remove('hidden'); // Show game area
         }
 
         /**
@@ -1934,6 +2219,7 @@
                 inputToReveal.classList.add('correct-answer');
                 inputToReveal.disabled = true; // Disable revealed letter
                 updateScore(-10); // Subtract points
+                revealSynth.triggerAttackRelease("G4", "8n"); // Play reveal sound
                 updateProgressBar();
                 showMessage('¡Letra revelada!', 'text-yellow-500');
                 checkCrosswordCompletion(); // Check completion after revealing a letter
@@ -2000,9 +2286,429 @@
         }
 
 
-        // --- Inicialización al Cargar la Ventana ---
+        // --- SIMPLE GAME WITH LEVELS LOGIC (Encapsulated) ---
+        window.simpleGame = (() => {
+            const simpleGameSection = document.getElementById('simple-game-section');
+            const canvas = simpleGameSection.querySelector('#simpleGameCanvas');
+            const ctx = canvas.getContext('2d');
+            const startButton = simpleGameSection.querySelector('#simpleGameStartButton');
+            const pauseButton = simpleGameSection.querySelector('#simpleGamePauseButton');
+            const stopButton = simpleGameSection.querySelector('#simpleGameStopButton');
+            const messageBox = simpleGameSection.querySelector('#simpleGameMessageBox');
+            const messageText = simpleGameSection.querySelector('#simpleGameMessageText');
+            const messageBoxButton = simpleGameSection.querySelector('#simpleGameMessageBoxButton');
+            const levelDisplay = simpleGameSection.querySelector('#simpleGameLevelDisplay');
+            const scoreDisplay = simpleGameSection.querySelector('#simpleGameScoreDisplay');
+            const levelScoreDisplay = simpleGameSection.querySelector('#simpleGameLevelScoreDisplay');
+
+            // Game state variables
+            let gameStarted = false;
+            let paused = false;
+            let animationFrameId;
+
+            let level = 1;
+            const maxLevels = 10;
+            let score = 0; // Total score
+            let levelScore = 0; // Score to pass level
+            const levelScoreTarget = 50; // Points needed to pass level
+
+            // Canvas dimensions
+            let canvasWidth;
+            let canvasHeight;
+
+            // Player
+            const player = {
+                x: 0,
+                y: 0,
+                radius: 20,
+                color: '#cbd5e0', // Light gray
+                baseSpeed: 5,
+                speed: 5
+            };
+
+            // Enemies (now an array)
+            let enemies = [];
+            const baseEnemySize = 30;
+            const baseEnemySpeed = 3;
+
+            // Collectible balls
+            let collectibles = [];
+            const collectibleRadius = 8;
+            const collectibleColor = '#f6e05e'; // Light yellow (coins)
+
+            // Initialize Tone.js synths for the simple game
+            const collectibleSynth = new Tone.Synth().toDestination();
+            const enemySynth = new Tone.NoiseSynth({
+                noise: { type: 'white' },
+                envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.2 }
+            }).toDestination();
+            const levelUpSynth = new Tone.Synth({
+                oscillator: { type: 'triangle' },
+                envelope: { attack: 0.01, decay: 0.2, sustain: 0.1, release: 0.5 }
+            }).toDestination();
+
+
+            // Function to show a message in the message box
+            function showMessageBox(message) {
+                messageText.textContent = message;
+                messageBox.style.display = 'block'; // Show message box
+            }
+
+            // Function to hide the message box
+            function hideMessageBox() {
+                messageBox.style.display = 'none'; // Hide message box
+                // Clear message text content for the next message
+                messageText.textContent = '';
+            }
+
+            // Function to adjust canvas size
+            function resizeCanvas() {
+                canvasWidth = canvas.offsetWidth;
+                canvasHeight = canvas.offsetHeight;
+
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
+
+                // Reposition player to the center of the canvas
+                player.x = canvasWidth / 2;
+                player.y = canvasHeight / 2;
+
+                // Reset game if in progress to readjust positions
+                if (gameStarted && !paused) {
+                    resetLevel(); // This also readjusts enemies and collectibles
+                } else if (!gameStarted) {
+                    draw(); // Draw initial message if game hasn't started
+                }
+            }
+
+            // Event listener for window resize
+            window.addEventListener('resize', resizeCanvas);
+
+            // Update game stats display
+            function updateGameStats() {
+                levelDisplay.textContent = level;
+                scoreDisplay.textContent = score;
+                levelScoreDisplay.textContent = `${levelScore}/${levelScoreTarget}`;
+            }
+
+            // Generate enemies for the current level
+            function generateEnemies() {
+                enemies = []; // Clear existing enemies
+                let numEnemies;
+                if (level === 1 || level === maxLevels) { // Special case for first and final level
+                    numEnemies = 1;
+                } else {
+                    numEnemies = level + 2; // Increase number of enemies per level for intermediate levels
+                }
+
+                for (let i = 0; i < numEnemies; i++) {
+                    enemies.push({
+                        x: Math.random() * (canvasWidth - baseEnemySize),
+                        y: Math.random() * (canvasHeight - baseEnemySize),
+                        size: baseEnemySize,
+                        color: '#fc8181', // Light red
+                        speed: baseEnemySpeed + (level * 0.5), // Increase speed per level
+                        directionX: Math.random() > 0.5 ? 1 : -1,
+                        directionY: Math.random() > 0.5 ? 1 : -1
+                    });
+                }
+            }
+
+            // Generate collectible balls for the current level
+            function generateCollectibles() {
+                collectibles = []; // Clear existing collectibles
+                const numCollectibles = 10; // Fixed number of collectibles per level
+                for (let i = 0; i < numCollectibles; i++) {
+                    collectibles.push({
+                        x: Math.random() * (canvasWidth - collectibleRadius * 2) + collectibleRadius,
+                        y: Math.random() * (canvasHeight - collectibleRadius * 2) + collectibleRadius,
+                        radius: collectibleRadius,
+                        color: collectibleColor
+                    });
+                }
+            }
+
+            // Reset the level (positions, enemies, collectibles)
+            function resetLevel() {
+                player.x = canvasWidth / 2;
+                player.y = canvasHeight / 2;
+                player.speed = player.baseSpeed; // Reset player base speed if modified
+
+                levelScore = 0; // Reset level score
+                generateEnemies();
+                generateCollectibles();
+                updateGameStats();
+            }
+
+            // Draw the player
+            function drawPlayer() {
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                ctx.fillStyle = player.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            // Draw enemies
+            function drawEnemies() {
+                enemies.forEach(enemy => {
+                    ctx.fillStyle = enemy.color;
+                    ctx.fillRect(enemy.x, enemy.y, enemy.size, enemy.size);
+                });
+            }
+
+            // Draw collectible balls
+            function drawCollectibles() {
+                collectibles.forEach(collectible => {
+                    ctx.beginPath();
+                    ctx.arc(collectible.x, collectible.y, collectible.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = collectible.color;
+                    ctx.fill();
+                    ctx.closePath();
+                });
+            }
+
+            // Update enemy positions
+            function updateEnemies() {
+                enemies.forEach(enemy => {
+                    enemy.x += enemy.speed * enemy.directionX;
+                    enemy.y += enemy.speed * enemy.directionY;
+
+                    // Bounce off canvas edges
+                    if (enemy.x + enemy.size > canvasWidth || enemy.x < 0) {
+                        enemy.directionX *= -1;
+                    }
+                    if (enemy.y + enemy.size > canvasHeight || enemy.y < 0) {
+                        enemy.directionY *= -1;
+                    }
+                });
+            }
+
+            // Check collision between player and an enemy
+            function checkEnemyCollision() {
+                for (let i = 0; i < enemies.length; i++) {
+                    const enemy = enemies[i];
+                    const distX = Math.abs(player.x - (enemy.x + enemy.size / 2));
+                    const distY = Math.abs(player.y - (enemy.y + enemy.size / 2));
+
+                    if (distX <= (enemy.size / 2 + player.radius) && distY <= (enemy.size / 2 + player.radius)) {
+                        // Collision with bounding box, check circle-square more precisely
+                        const dx = Math.max(0, distX - enemy.size / 2);
+                        const dy = Math.max(0, distY - enemy.size / 2);
+                        if ((dx * dx + dy * dy) <= (player.radius * player.radius)) {
+                            enemySynth.triggerAttackRelease("8n"); // Collision sound
+                            return true; // Collision occurred
+                        }
+                    }
+                }
+                return false; // No collision with any enemy
+            }
+
+            // Check collision between player and collectible balls
+            function checkCollectibleCollision() {
+                for (let i = collectibles.length - 1; i >= 0; i--) {
+                    const collectible = collectibles[i];
+                    const distance = Math.sqrt(
+                        Math.pow(player.x - collectible.x, 2) + Math.pow(player.y - collectible.y, 2)
+                    );
+                    if (distance < player.radius + collectible.radius) {
+                        // Collision with ball, add points and remove it
+                        levelScore += 1;
+                        score += 10; // Add 10 points per ball
+                        collectibles.splice(i, 1); // Remove the ball
+                        updateGameStats();
+                        collectibleSynth.triggerAttackRelease("C5", "8n"); // Collectible sound
+                    }
+                }
+            }
+
+            // Move player with arrow keys
+            document.addEventListener('keydown', (e) => {
+                if (!gameStarted || paused) return;
+
+                switch (e.key) {
+                    case 'ArrowUp':
+                        player.y = Math.max(player.y - player.speed, player.radius);
+                        break;
+                    case 'ArrowDown':
+                        player.y = Math.min(player.y + player.speed, canvasHeight - player.radius);
+                        break;
+                    case 'ArrowLeft':
+                        player.x = Math.max(player.x - player.speed, player.radius);
+                        break;
+                    case 'ArrowRight':
+                        player.x = Math.min(player.x + player.speed, canvasWidth - player.radius);
+                        break;
+                }
+            });
+
+            // Move player with touch gestures (swipe)
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            canvas.addEventListener('touchstart', (e) => {
+                if (!gameStarted || paused) return;
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (!gameStarted || paused) return;
+                e.preventDefault(); // Prevent page scrolling
+
+                const touchEndX = e.touches[0].clientX;
+                const touchEndY = e.touches[0].clientY;
+
+                const dx = touchEndX - touchStartX;
+                const dy = touchEndY - touchStartY;
+
+                // Move player based on drag
+                player.x = Math.min(Math.max(player.x + dx * 0.1, player.radius), canvasWidth - player.radius);
+                player.y = Math.min(Math.max(player.y + dy * 0.1, player.radius), canvasHeight - player.radius);
+
+                touchStartX = touchEndX;
+                touchStartY = touchEndY;
+            });
+
+            // Main game loop
+            function draw() {
+                ctx.clearRect(0, 0, canvasWidth, canvasHeight); // Clear the canvas
+
+                if (!gameStarted) {
+                    ctx.font = '24px Inter';
+                    ctx.fillStyle = '#e2e8f0'; // Light text
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Presiona "Iniciar Juego" para comenzar', canvasWidth / 2, canvasHeight / 2);
+                    animationFrameId = requestAnimationFrame(draw);
+                    return;
+                }
+
+                if (paused) {
+                    ctx.font = '36px Inter';
+                    ctx.fillStyle = '#63b3ed'; // Light blue
+                    ctx.textAlign = 'center';
+                    ctx.fillText('PAUSA', canvasWidth / 2, canvasHeight / 2);
+                    animationFrameId = requestAnimationFrame(draw);
+                    return;
+                }
+
+                // Game logic
+                updateEnemies(); // Update enemy positions
+                drawPlayer(); // Draw player
+                drawEnemies(); // Draw enemies
+                drawCollectibles(); // Draw collectible balls
+
+                checkCollectibleCollision(); // Check collisions with collectibles
+
+                if (checkEnemyCollision()) {
+                    stopGame(); // Stop the game if there's an enemy collision
+                    showMessageBox(`¡Colisión! El juego ha terminado en el Nivel ${level}. Puntuación final: ${score}`);
+                    return; // Stop the animation loop
+                }
+
+                // Level progression logic
+                if (levelScore >= levelScoreTarget) {
+                    if (level < maxLevels) {
+                        level++;
+                        levelUpSynth.triggerAttackRelease(["C5", "E5", "G5"], "4n"); // Level complete sound
+                        showMessageBox(`¡Nivel ${level - 1} completado! Preparando Nivel ${level}...`);
+                        // Set timeout for the message box to close, then reset the level
+                        messageBoxButton.onclick = () => {
+                            hideMessageBox();
+                            resetLevel();
+                            // Re-start the animation loop after the message box is dismissed
+                            animationFrameId = requestAnimationFrame(draw);
+                        };
+                        cancelAnimationFrame(animationFrameId); // Pause the drawing loop
+                        return; // Prevent further drawing until message box is dismissed
+                    } else {
+                        stopGame();
+                        levelUpSynth.triggerAttackRelease(["C5", "E5", "G5", "C6"], "2n"); // Final victory sound
+                        showMessageBox(`¡Felicidades! ¡Has completado todos los ${maxLevels} niveles! Puntuación final: ${score}`);
+                        return;
+                    }
+                }
+
+                animationFrameId = requestAnimationFrame(draw); // Continue the loop
+            }
+
+            // Function to start the game
+            function startGame() {
+                if (!gameStarted) {
+                    gameStarted = true;
+                    paused = false;
+                    hideMessageBox(); // Hide any previous message
+                    level = 1;
+                    score = 0;
+                    levelScore = 0;
+                    resetLevel(); // Set up the first level
+                    animationFrameId = requestAnimationFrame(draw); // Start the animation loop
+                } else if (paused) {
+                    resumeGame();
+                }
+            }
+
+            // Function to pause the game
+            function pauseGame() {
+                if (gameStarted && !paused) {
+                    paused = true;
+                    // We don't cancel animationFrameId here, we let draw draw the pause message
+                }
+            }
+
+            // Function to resume the game
+            function resumeGame() {
+                if (gameStarted && paused) {
+                    paused = false;
+                    // draw() is already in the loop, we just need to change the `paused` state
+                }
+            }
+
+            // Function to stop the game (complete reset)
+            function stopGame() {
+                if (gameStarted || paused) {
+                    gameStarted = false;
+                    paused = false;
+                    cancelAnimationFrame(animationFrameId); // Stop the animation loop
+                    // Reset everything to its initial state for the next start
+                    level = 1;
+                    score = 0;
+                    levelScore = 0;
+                    updateGameStats();
+                    // Draw the initial "Press Start Game" message
+                    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+                    ctx.font = '24px Inter';
+                    ctx.fillStyle = '#e2e8f0';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('Presiona "Iniciar Juego" para comenzar', canvasWidth / 2, canvasHeight / 2);
+                }
+            }
+
+            // Event listeners for buttons
+            startButton.addEventListener('click', startGame);
+            pauseButton.addEventListener('click', pauseGame);
+            stopButton.addEventListener('click', stopGame);
+            messageBoxButton.addEventListener('click', hideMessageBox); // Attach listener directly
+
+            // Public init function for the module
+            function init() {
+                resizeCanvas();
+                stopGame(); // Ensures the game is in a stopped state with the initial message
+            }
+
+            return {
+                init: init,
+                startGame: startGame,
+                pauseGame: pauseGame,
+                resumeGame: resumeGame,
+                stopGame: stopGame
+            };
+        })();
+
+
+        // --- Initialization on Window Load ---
         window.onload = function() {
-            showGamePortal(); // Muestra el portal de juegos por defecto
+            showGamePortal(); // Show the game portal by default
         };
     </script>
 </body>
